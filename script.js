@@ -15,12 +15,9 @@ let drawHeight = 0;
 let offsetX = 0;
 let offsetY = 0;
 
-// Для анимации
 let hoveredHero = null;
-let animationFrame = null;
 let time = 0;
 
-// Для отслеживания наведения мыши
 let mouseX = 0;
 let mouseY = 0;
 
@@ -71,34 +68,6 @@ function resizeCanvas() {
 
 window.addEventListener('resize', resizeCanvas);
 
-// Отслеживание движения мыши
-canvas.addEventListener('mousemove', (e) => {
-    const rect = canvas.getBoundingClientRect();
-    mouseX = e.clientX - rect.left;
-    mouseY = e.clientY - rect.top;
-    
-    // Проверяем, на какого героя навели
-    let newHovered = null;
-    heroes.forEach(hero => {
-        const x = toCanvasX(hero.x);
-        const y = toCanvasY(hero.y);
-        const scale = Math.max(2, drawWidth / ORIGINAL_WIDTH * 4);
-        
-        if (mouseX >= x - 25 && mouseX <= x + 25 && mouseY >= y - 30 && mouseY <= y + 30) {
-            newHovered = hero;
-        }
-    });
-    
-    hoveredHero = newHovered;
-});
-
-// Анимация (пульсация)
-function animate() {
-    time += 0.05;
-    drawMap();
-    requestAnimationFrame(animate);
-}
-
 function toCanvasX(x) {
     return offsetX + (x / ORIGINAL_WIDTH) * drawWidth;
 }
@@ -144,17 +113,14 @@ function drawHeroes() {
         const y = toCanvasY(hero.y);
         let scale = Math.max(2, drawWidth / ORIGINAL_WIDTH * 4);
         
-        // Анимация: если герой под курсором — увеличивается и пульсирует
         let isHovered = (hoveredHero === hero);
         let animScale = 1;
         
         if (isHovered) {
-            // Пульсация: масштаб от 1.1 до 1.3
             animScale = 1.1 + Math.sin(time * 10) * 0.05;
             scale = scale * animScale;
         }
         
-        // Тень при наведении
         if (isHovered) {
             ctx.shadowColor = '#ffcc66';
             ctx.shadowBlur = 15;
@@ -163,23 +129,18 @@ function drawHeroes() {
             ctx.shadowBlur = 8;
         }
 
-        // ОСНОВНАЯ ИКОНКА (голова)
         ctx.fillStyle = '#ffd39a';
         ctx.fillRect(x - scale, y - scale * 4, scale * 2, scale * 2);
         
-        // ТЕЛО
         ctx.fillStyle = hero.color;
         ctx.fillRect(x - scale * 1.5, y - scale * 2, scale * 3, scale * 3);
         
-        // ПОЯС / ДЕТАЛЬ
         ctx.fillStyle = '#700';
         ctx.fillRect(x - scale * 2, y - scale * 1.5, scale * 4, scale);
         
-        // ОРУЖИЕ / СИМВОЛ
         ctx.fillStyle = '#ffd700';
         ctx.fillRect(x + scale * 2, y - scale * 2, scale, scale * 4);
         
-        // ДОПОЛНИТЕЛЬНЫЙ БЛИК ПРИ НАВЕДЕНИИ
         if (isHovered) {
             ctx.fillStyle = 'rgba(255,255,200,0.6)';
             ctx.fillRect(x - scale * 1.2, y - scale * 3.5, scale * 2.4, scale * 1.2);
@@ -187,7 +148,6 @@ function drawHeroes() {
         
         ctx.shadowBlur = 0;
         
-        // ИМЯ ГЕРОЯ (с лёгкой анимацией при наведении)
         let fontSize = 14;
         let nameOffsetX = 18;
         let nameOffsetY = -10;
@@ -206,6 +166,49 @@ function drawHeroes() {
     });
 }
 
+// ===== СМЕНА КУРСОРА =====
+function updateCursor() {
+    const rect = canvas.getBoundingClientRect();
+    const mx = mouseX;
+    const my = mouseY;
+    
+    let isOverHero = false;
+    
+    heroes.forEach(hero => {
+        const x = toCanvasX(hero.x);
+        const y = toCanvasY(hero.y);
+        const scale = Math.max(2, drawWidth / ORIGINAL_WIDTH * 4);
+        
+        if (mx >= x - 30 && mx <= x + 30 && my >= y - 35 && my <= y + 35) {
+            isOverHero = true;
+        }
+    });
+    
+    canvas.style.cursor = isOverHero ? 'pointer' : 'default';
+}
+
+// ===== ОТСЛЕЖИВАНИЕ МЫШИ =====
+canvas.addEventListener('mousemove', (e) => {
+    const rect = canvas.getBoundingClientRect();
+    mouseX = e.clientX - rect.left;
+    mouseY = e.clientY - rect.top;
+    
+    let newHovered = null;
+    heroes.forEach(hero => {
+        const x = toCanvasX(hero.x);
+        const y = toCanvasY(hero.y);
+        const scale = Math.max(2, drawWidth / ORIGINAL_WIDTH * 4);
+        
+        if (mouseX >= x - 30 && mouseX <= x + 30 && mouseY >= y - 35 && mouseY <= y + 35) {
+            newHovered = hero;
+        }
+    });
+    
+    hoveredHero = newHovered;
+    updateCursor();
+});
+
+// ===== КЛИК =====
 canvas.addEventListener('click', (e) => {
     const rect = canvas.getBoundingClientRect();
     const mx = e.clientX - rect.left;
@@ -214,7 +217,6 @@ canvas.addEventListener('click', (e) => {
     heroes.forEach(hero => {
         const x = toCanvasX(hero.x);
         const y = toCanvasY(hero.y);
-        const scale = Math.max(2, drawWidth / ORIGINAL_WIDTH * 4);
 
         if (mx >= x - 30 && mx <= x + 30 && my >= y - 35 && my <= y + 35) {
             openModal(hero);
@@ -222,6 +224,14 @@ canvas.addEventListener('click', (e) => {
     });
 });
 
+// ===== АНИМАЦИЯ =====
+function animate() {
+    time += 0.05;
+    drawMap();
+    requestAnimationFrame(animate);
+}
+
+// ===== МОДАЛЬНОЕ ОКНО =====
 function openModal(hero) {
     document.getElementById('modal').style.display = 'flex';
     document.getElementById('modalTitle').textContent = hero.name;
@@ -232,11 +242,12 @@ function closeModal() {
     document.getElementById('modal').style.display = 'none';
 }
 
+// ===== ЗАПУСК =====
 mapImage.onload = () => {
     ORIGINAL_WIDTH = mapImage.width;
     ORIGINAL_HEIGHT = mapImage.height;
     resizeCanvas();
-    animate(); // Запускаем анимацию
+    animate();
 };
 
 mapImage.onerror = () => {
