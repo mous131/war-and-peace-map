@@ -3,22 +3,38 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Война и Мир — Интерактивная карта</title>
+  <title>Война и Мир — Судьба человека в исторических катастрофах</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
 <div class="ui-title">
-  ВОЙНА И МИР — КАРТА 1812
+  ⚔️ ВОЙНА И МИР ⚔️<br>
+  <span style="font-size: 10px;">Судьба человека в условиях исторических катастроф</span>
 </div>
 
 <canvas id="mapCanvas"></canvas>
 
 <div id="modal" class="modal">
   <div class="modal-content">
-    <div id="modalTitle" class="modal-title"></div>
-    <div id="modalText" class="modal-text"></div>
-    <button onclick="closeModal()">Закрыть</button>
+    <div class="modal-header">
+      <div class="modal-name" id="modalName"></div>
+    </div>
+    <div class="modal-body">
+      <div class="modal-section">
+        <div class="modal-section-title">📅 ДАТЫ ЖИЗНИ</div>
+        <div class="modal-section-content" id="modalDates">—</div>
+      </div>
+      <div class="modal-section">
+        <div class="modal-section-title">📍 МЕСТО СМЕРТИ</div>
+        <div class="modal-section-content" id="modalDeathPlace">—</div>
+      </div>
+      <div class="modal-section">
+        <div class="modal-section-title">📖 БИОГРАФИЯ</div>
+        <div class="modal-section-content" id="modalBio">—</div>
+      </div>
+    </div>
+    <button class="close-btn" onclick="closeModal()">✖ ЗАКРЫТЬ</button>
   </div>
 </div>
 
