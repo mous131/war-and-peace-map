@@ -37,7 +37,7 @@ canvas {
     backdrop-filter: blur(4px);
 }
 
-/* ===== МОДАЛЬНОЕ ОКНО ===== */
+/* ===== МОДАЛЬНОЕ ОКНО (RPG КАРТОЧКА) ===== */
 .modal {
     display: none;
     position: fixed;
@@ -49,11 +49,11 @@ canvas {
 }
 
 .modal-content {
-    width: 500px;
+    width: 520px;
     max-width: 90%;
     background: #0a0a0f;
-    border: 4px solid #8b1a1a;
-    box-shadow: 0 0 20px rgba(200, 0, 0, 0.4);
+    border: 4px solid #d4a73c;
+    box-shadow: 0 0 25px rgba(212, 167, 60, 0.3);
     padding: 0;
     overflow: hidden;
     animation: fadeIn 0.2s ease;
@@ -70,58 +70,83 @@ canvas {
     }
 }
 
+/* Верхняя панель с именем */
 .modal-header {
-    background: #8b1a1a;
-    padding: 15px 20px;
-    border-bottom: 2px solid #d4a73c;
+    background: linear-gradient(135deg, #1a0f05, #0a0500);
+    border-bottom: 3px solid #d4a73c;
+    padding: 18px 20px;
+    text-align: center;
 }
 
 .modal-header .modal-name {
-    font-size: 22px;
+    font-size: 20px;
     color: #ffd966;
-    margin: 0;
-    text-shadow: 2px 2px 0 #4a0000;
+    letter-spacing: 3px;
+    text-shadow: 2px 2px 0 #3a1f00;
 }
 
+/* Тело окна — сетка из блоков */
 .modal-body {
     padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
 }
 
-.modal-section {
-    margin-bottom: 20px;
-    border-left: 3px solid #8b1a1a;
-    padding-left: 12px;
+/* Каждый блок — отдельный квадрат */
+.modal-block {
+    background: #111115;
+    border: 2px solid #2a2a35;
+    padding: 12px 15px;
+    transition: 0.1s;
 }
 
-.modal-section-title {
+.modal-block:hover {
+    border-color: #d4a73c;
+    background: #14141a;
+}
+
+.modal-block-title {
     color: #d4a73c;
-    font-size: 11px;
+    font-size: 10px;
     letter-spacing: 2px;
-    margin-bottom: 6px;
+    margin-bottom: 8px;
     text-transform: uppercase;
+    display: flex;
+    align-items: center;
+    gap: 8px;
 }
 
-.modal-section-content {
-    color: #f0ddb1;
+.modal-block-title span {
     font-size: 14px;
-    line-height: 1.5;
 }
 
+.modal-block-content {
+    color: #f0ddb1;
+    font-size: 13px;
+    line-height: 1.5;
+    word-break: break-word;
+}
+
+/* Разделитель между блоками не нужен — уже gap */
+
+/* Кнопка закрытия */
 .close-btn {
-    background: #2a0a0a;
+    background: #1a0f05;
     border: none;
-    border-top: 2px solid #8b1a1a;
-    color: #ffaa66;
+    border-top: 3px solid #d4a73c;
+    color: #d4a73c;
     padding: 12px 20px;
     cursor: pointer;
     font-family: 'Courier New', monospace;
-    font-size: 14px;
+    font-size: 13px;
     width: 100%;
     transition: 0.2s;
     font-weight: bold;
+    letter-spacing: 2px;
 }
 
 .close-btn:hover {
-    background: #8b1a1a;
-    color: #ffd966;
+    background: #d4a73c;
+    color: #0a0a0f;
 }
