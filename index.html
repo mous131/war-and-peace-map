@@ -67,8 +67,8 @@
     }
 
     .modal-content {
-      width: 500px;
-      max-width: 85%;
+      width: 550px;
+      max-width: 90%;
       background: linear-gradient(135deg, #1a1a2e, #0f0f1a);
       border: 3px solid #ffaa44;
       box-shadow: 0 0 30px rgba(255, 170, 68, 0.4);
@@ -89,7 +89,7 @@
     }
 
     .modal-name {
-      font-size: 20px;
+      font-size: 22px;
       color: #ffcc66;
       letter-spacing: 2px;
       font-weight: bold;
@@ -97,7 +97,7 @@
     }
 
     .modal-year {
-      font-size: 11px;
+      font-size: 12px;
       color: #ff8866;
       margin-top: 5px;
     }
@@ -108,23 +108,23 @@
 
     .info-block {
       background: rgba(0, 0, 0, 0.4);
-      margin-bottom: 12px;
-      padding: 10px 12px;
+      margin-bottom: 14px;
+      padding: 12px 14px;
       border-left: 4px solid #ffaa44;
     }
 
     .info-label {
       color: #ffaa66;
-      font-size: 10px;
-      letter-spacing: 1px;
-      margin-bottom: 5px;
+      font-size: 11px;
+      letter-spacing: 2px;
+      margin-bottom: 8px;
       text-transform: uppercase;
     }
 
     .info-value {
       color: #eeddbb;
       font-size: 13px;
-      line-height: 1.5;
+      line-height: 1.6;
     }
 
     .close-btn {
@@ -161,15 +161,11 @@
     </div>
     <div class="modal-body">
       <div class="info-block">
-        <div class="info-label">⚔ СТАТУС</div>
-        <div class="info-value" id="modalStatus"></div>
-      </div>
-      <div class="info-block">
-        <div class="info-label">📅 ДАТЫ</div>
+        <div class="info-label">📅 ДАТЫ ЖИЗНИ</div>
         <div class="info-value" id="modalDates"></div>
       </div>
       <div class="info-block">
-        <div class="info-label">📍 МЕСТО</div>
+        <div class="info-label">📍 МЕСТО СМЕРТИ</div>
         <div class="info-value" id="modalDeathPlace"></div>
       </div>
       <div class="info-block">
@@ -258,13 +254,68 @@
     ]
   };
 
+  // ===== РАСШИРЕННЫЕ БИОГРАФИИ (по тексту романа) =====
   const heroes = [
-    { name: 'Анатоль Курагин', iconType: 'warrior', birthYear: 'ок. 1780', deathYear: '1812', deathPlace: 'После Бородино', x: 1004, y: 414, color: '#d13a2f', bio: 'Красавец и повеса. Тяжело ранен под Бородином, умер от гангрены.' },
-    { name: 'Петя Ростов', iconType: 'warrior', birthYear: '1797', deathYear: '1812', deathPlace: 'Под Вязьмой', x: 965, y: 482, color: '#ff5555', bio: '15-летний юноша. Погиб в партизанском бою.' },
-    { name: 'Князь Болконский', iconType: 'noble', birthYear: '1736', deathYear: '1812', deathPlace: 'Лысые Горы', x: 1270, y: 235, color: '#992222', bio: 'Старый князь. Умер при приближении французов.' },
-    { name: 'Элен Безухова', iconType: 'noble', birthYear: '1785', deathYear: '1812', deathPlace: 'Санкт-Петербург', x: 848, y: 127, color: '#e6b85c', bio: 'Светская красавица. Умерла при загадочных обстоятельствах.' },
-    { name: 'Кутузов', iconType: 'commander', birthYear: '1745', deathYear: '1813', deathPlace: 'Бунцлау', x: 481, y: 551, color: '#c9a227', bio: 'Главнокомандующий. Умер после изгнания Наполеона.' },
-    { name: 'Наполеон', iconType: 'commander', birthYear: '1769', deathYear: '1821', deathPlace: 'Остров Св. Елены', x: 68, y: 630, color: '#555', bio: 'Император Франции. Умер в ссылке.' }
+    { 
+      name: 'Анатоль Курагин', 
+      iconType: 'warrior', 
+      birthYear: 'ок. 1780', 
+      deathYear: '1812', 
+      deathPlace: 'После Бородинского сражения', 
+      x: 1004, y: 414, 
+      color: '#d13a2f', 
+      bio: 'Сын князя Василия, брат Элен. Красавец, повеса, кутила. Попытался украсть Наташу Ростову, что привело к разрыву её помолвки с Андреем Болконским. Во время Бородинского сражения был тяжело ранен в ногу. Ему сделали ампутацию, но спасти не смогли. Толстой показывает его смерть как мучительную — на краю смерти Анатоль просит прощения и жалеет всех. Умер от гангрены.'
+    },
+    { 
+      name: 'Петя Ростов', 
+      iconType: 'warrior', 
+      birthYear: '1797', 
+      deathYear: '1812', 
+      deathPlace: 'Под Вязьмой', 
+      x: 965, y: 482, 
+      color: '#ff5555', 
+      bio: 'Младший сын графа Ростова, брат Наташи. В 15 лет ушёл на войну, полный романтических представлений о подвиге. Попал в партизанский отряд Денисова. Во время стычки с французами бросился вперёд на лошади и был убит. Толстой описывает его смерть как страшную и бессмысленную: «Петя взмахнул руками, но что-то тяжело ударило его в голову». Его гибель стала тяжёлым ударом для семьи, особенно для матери.'
+    },
+    { 
+      name: 'Князь Николай Болконский', 
+      iconType: 'noble', 
+      birthYear: '1736', 
+      deathYear: '1812', 
+      deathPlace: 'Лысые Горы', 
+      x: 1270, y: 235, 
+      color: '#992222', 
+      bio: 'Отец Андрея Болконского, старый вельможа екатерининских времён. Гордый, властный, умный человек. При приближении французов к Лысым Горам отказался бежать, не желая унижаться перед врагом. Был разбит параличом. Перед смертью успел попросить прощения у дочери Марьи и сказать: «Душа болит…». Толстой показывает его смерть как крушение старого мира, не способного принять новую реальность войны.'
+    },
+    { 
+      name: 'Элен Безухова', 
+      iconType: 'noble', 
+      birthYear: '1785', 
+      deathYear: '1812', 
+      deathPlace: 'Санкт-Петербург', 
+      x: 848, y: 127, 
+      color: '#e6b85c', 
+      bio: 'Дочь князя Василия, сестра Анатоля. Светская красавица, одна из самых блестящих женщин Петербурга. Жена Пьера Безухова. Вела распутный образ жизни, изменяла мужу. После разрыва с Пьером пыталась выйти замуж за двух знатных женихов одновременно. Умерла внезапно при загадочных обстоятельствах — вероятно, от последствий неудачного аборта или сердечного приступа. Толстой оставляет её смерть за кадром, показывая пустоту светской жизни.'
+    },
+    { 
+      name: 'Михаил Кутузов', 
+      iconType: 'commander', 
+      birthYear: '1745', 
+      deathYear: '1813', 
+      deathPlace: 'Бунцлау, Силезия', 
+      x: 481, y: 551, 
+      color: '#c9a227', 
+      bio: 'Главнокомандующий русской армией. Старый, больной, но мудрый полководец. Понимал, что Наполеона нужно измотать отступлением. Принял тяжёлое решение сдать Москву, чтобы сохранить армию. Дождался, пока французы начнут отступление, и нанёс им удар. Умер в апреле 1813 года в прусском городке Бунцлау, когда война была уже выиграна. Толстой пишет: «Пришла смерть, и она сказала ему, что пора». Кутузов уходит из жизни сразу после выполнения своей миссии.'
+    },
+    { 
+      name: 'Наполеон Бонапарт', 
+      iconType: 'commander', 
+      birthYear: '1769', 
+      deathYear: '1821', 
+      deathPlace: 'Остров Святой Елены', 
+      x: 68, y: 630, 
+      color: '#555', 
+      bio: 'Император Франции, гений полководческого искусства. В 1812 году вторгся в Россию с 600-тысячной армией, надеясь на быструю победу. Занял пустую Москву, прождал месяц капитуляции, не дождался. Позорно бежал, бросив свою армию в России. После поражения при Ватерлоо был сослан англичанами на остров Святой Елены, где умер от рака желудка в 1821 году. Толстой показывает его как историческую фигуру, не понимавшую истинного смысла происходящего — «ничтожного орудия истории».'
+    }
   ];
 
   function drawPixelIcon(x, y, size, iconType, heroColor) {
@@ -330,11 +381,9 @@
       drawPixelIcon(x, y, iconSize, hero.iconType, hero.color);
       ctx.shadowBlur = 0;
       
-      // Увеличенный шрифт для имён (с 1/3 до 2/5 от размера иконки)
       let fontSize = Math.max(12, iconSize / 2.2);
       ctx.font = `bold ${fontSize}px 'Courier New', monospace`;
       
-      // Тень для читаемости
       ctx.fillStyle = '#000000';
       ctx.fillText(hero.name, x + iconSize/2 + 5, y - 5);
       ctx.fillStyle = '#ffddaa';
@@ -383,14 +432,6 @@
   function openModal(hero) {
     document.getElementById('modalName').textContent = hero.name;
     document.getElementById('modalYear').textContent = hero.deathYear ? `† ${hero.deathYear}` : '';
-    // Добавляем "погибла/умерла" для Элен
-    let statusText = '';
-    if (hero.name === 'Элен Безухова') {
-      statusText = 'ПОГИБЛА / УМЕРЛА';
-    } else {
-      statusText = hero.deathYear ? 'ПОГИБ / УМЕР' : 'ВЫЖИЛ';
-    }
-    document.getElementById('modalStatus').textContent = statusText;
     document.getElementById('modalDates').textContent = `${hero.birthYear} — ${hero.deathYear || '...'}`;
     document.getElementById('modalDeathPlace').textContent = hero.deathPlace || '—';
     document.getElementById('modalBio').textContent = hero.bio;
