@@ -10,12 +10,29 @@
     canvas { position: fixed; inset: 0; width: 100vw; height: 100vh; display: block; background: #0a0a0f; cursor: default; touch-action: none; }
     .frame { position: fixed; inset: 8px; pointer-events: none; border: 2px solid #8b3a1a; z-index: 50; }
     .quote { position: fixed; bottom: 10px; left: 0; right: 0; text-align: center; color: #8a7a5a; font-size: 8px; background: rgba(10, 10, 15, 0.85); padding: 5px; z-index: 100; letter-spacing: 1px; border-top: 1px solid #3a2a1a; border-bottom: 1px solid #3a2a1a; pointer-events: none; }
+    
+    /* Подсказка для телефона */
+    .mobile-hint {
+      position: fixed;
+      bottom: 50px;
+      right: 10px;
+      background: rgba(0,0,0,0.6);
+      color: #8a7a5a;
+      font-size: 8px;
+      padding: 4px 8px;
+      border-radius: 4px;
+      z-index: 150;
+      pointer-events: none;
+      font-family: monospace;
+    }
+    
     .loader { position: fixed; inset: 0; background: #0a0a0f; display: flex; justify-content: center; align-items: center; z-index: 200; transition: opacity 0.5s ease; flex-direction: column; gap: 15px; }
     .loader.hide { opacity: 0; pointer-events: none; }
     .pixel-loader { width: 32px; height: 32px; background: #8b3a1a; animation: pulse 0.8s infinite; }
     @keyframes pulse { 0% { transform: scale(0.8); opacity: 0.5; } 50% { transform: scale(1.2); opacity: 1; } 100% { transform: scale(0.8); opacity: 0.5; } }
     .loader-text { color: #8a7a5a; font-size: 9px; letter-spacing: 2px; }
     .loader-progress { color: #c8b88a; font-size: 11px; margin-top: 5px; }
+    
     .conclusion-btn { position: fixed; top: 16px; left: 16px; z-index: 150; background: #1a1a1f; border: 2px solid #8b3a1a; color: #c8b88a; padding: 8px 14px; font-family: 'Courier New', monospace; font-size: 11px; font-weight: bold; cursor: pointer; transition: 0.2s; letter-spacing: 1px; backdrop-filter: blur(2px); }
     .conclusion-btn:hover { background: #8b3a1a; color: #0a0a0f; border-color: #c8b88a; }
     .conclusion-modal { display: none; position: fixed; inset: 0; background: rgba(10, 10, 15, 0.95); z-index: 300; justify-content: center; align-items: center; }
@@ -24,6 +41,7 @@
     .conclusion-text { color: #b8a87a; font-size: 12px; line-height: 1.6; text-align: justify; }
     .conclusion-text p { margin-bottom: 12px; }
     .close-conclusion { background: #1a1a1f; border: 2px solid #8b3a1a; color: #c8b88a; padding: 8px 16px; margin-top: 20px; cursor: pointer; font-family: monospace; width: 100%; }
+    
     .modal { display: none; position: fixed; inset: 0; background: rgba(10, 10, 15, 0.95); z-index: 999; justify-content: center; align-items: center; }
     .modal-content { width: 90%; max-width: 500px; max-height: 85vh; background: #0f0f14; border: 2px solid #8b3a1a; padding: 0; overflow-y: auto; }
     .modal-header { background: #1a1a1f; padding: 12px 16px; border-bottom: 1px solid #3a2a1a; text-align: center; position: sticky; top: 0; }
@@ -35,6 +53,7 @@
     .info-value { color: #b8a87a; font-size: 12px; line-height: 1.5; }
     .close-btn { background: #1a1a1f; border: none; border-top: 1px solid #3a2a1a; color: #c8b88a; padding: 12px; cursor: pointer; font-family: monospace; font-size: 12px; width: 100%; transition: 0.2s; }
     .close-btn:hover { background: #8b3a1a; color: #0a0a0f; }
+    
     @media (max-width: 768px) { .info-value { font-size: 11px; } .modal-name { font-size: 16px; } .modal-body { padding: 12px; } .conclusion-title { font-size: 14px; } .conclusion-text { font-size: 11px; } }
   </style>
 </head>
@@ -43,6 +62,7 @@
 <canvas id="mapCanvas"></canvas>
 <div class="frame"></div>
 <div class="quote">Надо жить, надо любить, надо верить... — Лев Толстой</div>
+<div class="mobile-hint">✋ ДВА ПАЛЬЦА — ЗУМ | ОДИН ПАЛЕЦ — ПЕРЕМЕЩЕНИЕ</div>
 
 <button class="conclusion-btn" id="conclusionBtn">ВЫВОД</button>
 
@@ -100,6 +120,7 @@
   let lastTouchX = 0;
   let lastTouchY = 0;
   let isPanning = false;
+  let isZooming = false;
   let hoveredHero = null;
 
   const loader = document.getElementById('loader');
@@ -118,68 +139,13 @@
     commander: [[0,0,0,0,1,1,1,1,1,1,0,0,0,0,0,0],[0,0,0,1,2,2,2,2,2,2,1,0,0,0,0,0],[0,0,1,2,2,2,2,2,2,2,2,1,0,0,0,0],[0,0,1,2,2,2,2,2,2,2,2,1,0,0,0,0],[0,0,1,2,2,2,2,2,2,2,2,1,0,0,0,0],[0,0,0,1,2,2,3,3,2,2,1,0,0,0,0,0],[0,0,0,0,1,3,3,3,3,1,0,0,0,0,0,0],[0,0,0,1,1,3,3,3,3,1,1,0,0,0,0,0],[0,0,1,2,1,3,3,3,3,1,2,1,0,0,0,0],[0,0,1,2,1,1,1,1,1,1,2,1,0,0,0,0],[0,0,1,2,2,1,1,1,1,2,2,1,0,0,0,0],[0,0,0,1,2,2,1,1,2,2,1,0,0,0,0,0],[0,0,0,1,2,2,0,0,2,2,1,0,0,0,0,0],[0,0,0,0,1,1,0,0,1,1,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]]
   };
 
-  // ===== РАСШИРЕННЫЕ БИОГРАФИИ (ПОЛНЫЕ, С ЦИТАТАМИ) =====
   const heroes = [
-    { 
-      name: 'Анатоль Курагин', 
-      iconType: 'warrior', 
-      birthYear: '?', 
-      deathYear: '1812', 
-      deathPlace: 'После Бородинского сражения', 
-      x: 1004, y: 414, 
-      color: '#8a3a2a', 
-      bio: 'Сын князя Василия, брат Элен. Красавец, кутила, картёжник. Жил одним днём, не думая о последствиях. Попытался украсть Наташу Ростову, чем разрушил её помолвку с Андреем Болконским. Во время Бородинского сражения был тяжело ранен в ногу. Ему сделали ампутацию, но спасти не смогли. Умер от гангрены. Толстой показывает его смерть как мучительную: на краю смерти Анатоль просит прощения и жалеет всех — даже тех, кого не любил при жизни.'
-    },
-    { 
-      name: 'Петя Ростов', 
-      iconType: 'warrior', 
-      birthYear: '1797', 
-      deathYear: '1812', 
-      deathPlace: 'Под Вязьмой', 
-      x: 965, y: 482, 
-      color: '#aa5544', 
-      bio: 'Младший сын графа Ростова, брат Наташи. В 15 лет ушёл на войну, полный романтических представлений о подвиге. Попал в партизанский отряд Денисова. Во время стычки с французами бросился вперёд на лошади и был убит. Толстой описывает его смерть как страшную и бессмысленную: «Петя взмахнул руками, но что-то тяжело ударило его в голову». Его гибель стала тяжёлым ударом для семьи, особенно для матери, которая сходила с ума от горя. Символ того, как война убивает молодость и надежды.'
-    },
-    { 
-      name: 'Андрей Болконский', 
-      iconType: 'noble', 
-      birthYear: '1778', 
-      deathYear: '1812', 
-      deathPlace: 'Ярославль', 
-      x: 1220, y: 170, 
-      color: '#6688aa', 
-      bio: 'Князь, один из главных героев романа. Участвовал в Аустерлицком сражении, где был ранен и понял ничтожность славы: «Небо над Аустерлицем» стало для него символом вечной истины. Полюбил Наташу Ростову, но отложил свадьбу на год по требованию отца. Наташа изменила ему с Анатолем Курагиным — это стало тяжёлым ударом. На Бородинском поле был смертельно ранен осколком гранаты. Перевезён в Ярославль, где умер на руках у Наташи и сестры Марьи. Перед смертью простил всех и познал истинную любовь. Его последние слова: «Надо жить, надо любить, надо верить».'
-    },
-    { 
-      name: 'Элен Безухова', 
-      iconType: 'noble', 
-      birthYear: '1780-е', 
-      deathYear: '1812', 
-      deathPlace: 'Санкт-Петербург', 
-      x: 848, y: 127, 
-      color: '#b88a5a', 
-      bio: 'Дочь князя Василия, сестра Анатоля. Светская красавица, одна из самых блестящих женщин Петербурга. Жена Пьера Безухова. Вела распутный образ жизни, изменяла мужу. После разрыва с Пьером пыталась выйти замуж за двух знатных женихов одновременно — за старика-вельможу и за иностранного принца. Умерла внезапно при загадочных обстоятельствах — вероятно, от последствий неудачного аборта или сердечного приступа. Толстой оставляет её смерть за кадром, показывая пустоту светской жизни. Труп Элен убирают на следующий день — никто даже не скорбел по-настоящему.'
-    },
-    { 
-      name: 'Михаил Кутузов', 
-      iconType: 'commander', 
-      birthYear: '1745', 
-      deathYear: '1813 (28 апреля)', 
-      deathPlace: 'Бунцлау, Силезия', 
-      x: 481, y: 551, 
-      color: '#8a7a4a', 
-      bio: 'Главнокомандующий русской армией. Старый, больной, но мудрый полководец. Понимал, что Наполеона нужно измотать отступлением. Принял тяжёлое решение сдать Москву, чтобы сохранить армию. Дождался, пока французы начнут отступление, и нанёс им удар. Умер в апреле 1813 года в прусском городке Бунцлау, когда война была уже выиграна. Толстой пишет: «Пришла смерть, и она сказала ему, что пора». Кутузов уходит из жизни сразу после выполнения своей миссии — как народный герой, сделавший всё, что мог.'
-    },
-    { 
-      name: 'Наполеон Бонапарт', 
-      iconType: 'commander', 
-      birthYear: '1769', 
-      deathYear: '1821 (5 мая)', 
-      deathPlace: 'Остров Святой Елены', 
-      x: 68, y: 630, 
-      color: '#6a6a6a', 
-      bio: 'Император Франции, гений полководческого искусства. В 1812 году вторгся в Россию с 600-тысячной армией, надеясь на быструю победу. Занял пустую Москву, прождал месяц капитуляции, не дождался. Позорно бежал, бросив свою армию в России. После поражения при Ватерлоо был сослан англичанами на остров Святой Елены, где умер от рака желудка в 1821 году. Толстой показывает его как историческую фигуру, не понимавшую истинного смысла происходящего — «ничтожное орудие истории», которое считало себя вершителем судеб. Перед смертью сказал: «Франция, армия, во главе армии — Жозефина...»'
-    }
+    { name: 'Анатоль Курагин', iconType: 'warrior', birthYear: '?', deathYear: '1812', deathPlace: 'После Бородинского сражения', x: 1004, y: 414, color: '#8a3a2a', bio: 'Сын князя Василия, брат Элен. Красавец, кутила, картёжник. Жил одним днём. Попытался украсть Наташу Ростову, чем разрушил её помолвку с Андреем. Во время Бородинского сражения был тяжело ранен в ногу. Ему сделали ампутацию, но спасти не смогли. Умер от гангрены. На краю смерти Анатоль просит прощения и жалеет всех.' },
+    { name: 'Петя Ростов', iconType: 'warrior', birthYear: '1797', deathYear: '1812', deathPlace: 'Под Вязьмой', x: 965, y: 482, color: '#aa5544', bio: 'Младший сын графа Ростова, брат Наташи. В 15 лет ушёл на войну, полный романтических представлений о подвиге. Попал в партизанский отряд Денисова. Во время стычки с французами бросился вперёд на лошади и был убит. Толстой пишет: «Петя взмахнул руками, но что-то тяжело ударило его в голову». Символ того, как война убивает молодость и надежды.' },
+    { name: 'Андрей Болконский', iconType: 'noble', birthYear: '1778', deathYear: '1812', deathPlace: 'Ярославль', x: 1220, y: 170, color: '#6688aa', bio: 'Князь, герой Аустерлица и Бородина. Понял ничтожность славы: «Небо над Аустерлицем» стало символом истины. Полюбил Наташу, но отложил свадьбу. Наташа изменила ему с Анатолем. На Бородинском поле смертельно ранен. Умер в Ярославле на руках у Наташи и Марьи, простив всех. Перед смертью: «Надо жить, надо любить, надо верить».' },
+    { name: 'Элен Безухова', iconType: 'noble', birthYear: '1780-е', deathYear: '1812', deathPlace: 'Санкт-Петербург', x: 848, y: 127, color: '#b88a5a', bio: 'Дочь князя Василия, сестра Анатоля. Светская красавица, жена Пьера. Вела распутный образ жизни. После разрыва с Пьером пыталась выйти замуж за двоих одновременно. Умерла внезапно при загадочных обстоятельствах. Труп убирают на следующий день — никто не скорбел. Символ пустоты светской жизни.' },
+    { name: 'Михаил Кутузов', iconType: 'commander', birthYear: '1745', deathYear: '1813 (28 апр.)', deathPlace: 'Бунцлау, Силезия', x: 481, y: 551, color: '#8a7a4a', bio: 'Главнокомандующий русской армией. Старый, больной, но мудрый. Сдал Москву, чтобы сохранить армию. Дождался отступления французов и нанёс удар. Умер в апреле 1813 года, когда война была уже выиграна. Толстой: «Пришла смерть, и она сказала ему, что пора». Народный герой.' },
+    { name: 'Наполеон', iconType: 'commander', birthYear: '1769', deathYear: '1821 (5 мая)', deathPlace: 'Остров Святой Елены', x: 68, y: 630, color: '#6a6a6a', bio: 'Император Франции. Вторгся в Россию с 600-тысячной армией, занял пустую Москву, позорно бежал. Умер в ссылке. Толстой называет его «ничтожным орудием истории». Перед смертью: «Франция, армия, во главе армии — Жозефина...»' }
   ];
 
   function toCanvasX(x) { return (x / ORIGINAL_WIDTH) * canvas.width * zoom + panX; }
@@ -200,7 +166,7 @@
   function drawHeroes() {
     heroes.forEach(h => {
       const x = toCanvasX(h.x), y = toCanvasY(h.y);
-      let sz = Math.max(20, Math.min(45, 32 * zoom));
+      let sz = Math.max(22, Math.min(48, 34 * zoom));
       let hover = (hoveredHero === h);
       if (hover) { sz *= 1.1; ctx.shadowBlur = 10; ctx.shadowColor = '#8b3a1a'; }
       else { ctx.shadowBlur = 3; ctx.shadowColor = '#000'; }
@@ -225,46 +191,85 @@
 
   function getDistance(t) { return Math.hypot(t[0].clientX - t[1].clientX, t[0].clientY - t[1].clientY); }
   
+  // Обработка касаний с защитой от конфликта
   canvas.addEventListener('touchstart', e => {
     e.preventDefault();
-    if (e.touches.length === 2) { initialDistance = getDistance(e.touches); initialZoom = zoom; isPanning = false; }
-    else if (e.touches.length === 1) { lastTouchX = e.touches[0].clientX; lastTouchY = e.touches[0].clientY; isPanning = true; }
+    if (e.touches.length === 2) {
+      isZooming = true;
+      isPanning = false;
+      initialDistance = getDistance(e.touches);
+      initialZoom = zoom;
+    } else if (e.touches.length === 1 && !isZooming) {
+      isPanning = true;
+      lastTouchX = e.touches[0].clientX;
+      lastTouchY = e.touches[0].clientY;
+    }
   });
+  
   canvas.addEventListener('touchmove', e => {
     e.preventDefault();
     if (e.touches.length === 2 && initialDistance > 0) {
       let newZoom = initialZoom * (getDistance(e.touches) / initialDistance);
       zoom = Math.min(Math.max(0.8, newZoom), 3);
       drawMap();
-    } else if (e.touches.length === 1 && isPanning) {
+    } else if (e.touches.length === 1 && isPanning && !isZooming) {
       panX += e.touches[0].clientX - lastTouchX;
       panY += e.touches[0].clientY - lastTouchY;
       let mp = canvas.width * (zoom-1)/2, mp2 = canvas.height * (zoom-1)/2;
       panX = Math.min(Math.max(panX, -mp), mp);
       panY = Math.min(Math.max(panY, -mp2), mp2);
-      lastTouchX = e.touches[0].clientX; lastTouchY = e.touches[0].clientY;
+      lastTouchX = e.touches[0].clientX;
+      lastTouchY = e.touches[0].clientY;
       drawMap();
     }
   });
-  canvas.addEventListener('touchend', e => { if (e.touches.length < 2) initialDistance = 0; if (e.touches.length === 0) isPanning = false; });
+  
+  canvas.addEventListener('touchend', e => {
+    if (e.touches.length < 2) { isZooming = false; initialDistance = 0; }
+    if (e.touches.length === 0) { isPanning = false; isZooming = false; }
+  });
+
+  // Обработка кликов (увеличенная зона 50px)
+  function checkHeroTap(clientX, clientY) {
+    const r = canvas.getBoundingClientRect();
+    const tapX = (clientX - r.left) * (canvas.width / r.width);
+    const tapY = (clientY - r.top) * (canvas.height / r.height);
+    const origX = toOriginalX(tapX);
+    const origY = toOriginalY(tapY);
+    
+    for (let h of heroes) {
+      const dx = Math.abs(origX - h.x);
+      const dy = Math.abs(origY - h.y);
+      if (dx < 50 && dy < 50) {
+        openModal(h);
+        return true;
+      }
+    }
+    return false;
+  }
 
   canvas.addEventListener('click', e => {
-    const r = canvas.getBoundingClientRect();
-    const ox = toOriginalX(e.clientX - r.left), oy = toOriginalY(e.clientY - r.top);
-    heroes.forEach(h => { if (Math.abs(ox - h.x) < 35 && Math.abs(oy - h.y) < 35) openModal(h); });
+    checkHeroTap(e.clientX, e.clientY);
   });
+  
   canvas.addEventListener('touchstart', e => {
-    if (e.touches.length === 1 && !isPanning && initialDistance === 0) {
-      const r = canvas.getBoundingClientRect();
-      const ox = toOriginalX(e.touches[0].clientX - r.left), oy = toOriginalY(e.touches[0].clientY - r.top);
-      heroes.forEach(h => { if (Math.abs(ox - h.x) < 35 && Math.abs(oy - h.y) < 35) setTimeout(() => openModal(h), 50); });
+    if (e.touches.length === 1 && !isPanning && !isZooming) {
+      // Небольшая задержка, чтобы отличить от панорамирования
+      setTimeout(() => {
+        if (!isPanning && !isZooming) {
+          checkHeroTap(e.touches[0].clientX, e.touches[0].clientY);
+        }
+      }, 50);
     }
   });
+  
   canvas.addEventListener('mousemove', e => {
     const r = canvas.getBoundingClientRect();
-    const ox = toOriginalX(e.clientX - r.left), oy = toOriginalY(e.clientY - r.top);
+    const mx = (e.clientX - r.left) * (canvas.width / r.width);
+    const my = (e.clientY - r.top) * (canvas.height / r.height);
+    const ox = toOriginalX(mx), oy = toOriginalY(my);
     let nh = null;
-    heroes.forEach(h => { if (Math.abs(ox - h.x) < 35 && Math.abs(oy - h.y) < 35) nh = h; });
+    heroes.forEach(h => { if (Math.abs(ox - h.x) < 50 && Math.abs(oy - h.y) < 50) nh = h; });
     hoveredHero = nh;
     canvas.style.cursor = nh ? 'pointer' : 'default';
     drawMap();
