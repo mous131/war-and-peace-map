@@ -2,13 +2,14 @@
 <html lang="ru">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
   <title>Война и Мир — Судьба человека</title>
   <style>
     * {
       margin: 0;
       padding: 0;
       box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
     }
 
     html, body {
@@ -17,6 +18,7 @@
       overflow: hidden;
       background: #0a0a1a;
       font-family: 'Courier New', monospace;
+      touch-action: none;
     }
 
     canvas {
@@ -27,11 +29,12 @@
       display: block;
       background: #0a0a1a;
       cursor: default;
+      touch-action: manipulation;
     }
 
     .frame {
       position: fixed;
-      inset: 10px;
+      inset: 8px;
       pointer-events: none;
       border: 3px solid #ff6600;
       box-shadow: 0 0 10px #ff6600, inset 0 0 10px #ff660033;
@@ -41,13 +44,13 @@
 
     .quote {
       position: fixed;
-      bottom: 15px;
+      bottom: 10px;
       left: 0;
       right: 0;
       text-align: center;
       color: #ffaa44;
-      font-size: 9px;
-      background: rgba(10, 10, 26, 0.8);
+      font-size: 8px;
+      background: rgba(10, 10, 26, 0.85);
       padding: 5px;
       z-index: 100;
       letter-spacing: 1px;
@@ -55,25 +58,63 @@
       border-bottom: 1px solid #ff6600;
     }
 
+    /* Загрузочный экран */
+    .loader {
+      position: fixed;
+      inset: 0;
+      background: #0a0a1a;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 200;
+      transition: opacity 0.5s ease;
+      flex-direction: column;
+      gap: 15px;
+    }
+    .loader.hide {
+      opacity: 0;
+      pointer-events: none;
+    }
+    .pixel-loader {
+      width: 48px;
+      height: 48px;
+      background: #ff6600;
+      animation: pulse 0.8s infinite;
+      box-shadow: 0 0 15px #ff6600;
+    }
+    @keyframes pulse {
+      0% { transform: scale(0.8); opacity: 0.5; }
+      50% { transform: scale(1.2); opacity: 1; }
+      100% { transform: scale(0.8); opacity: 0.5; }
+    }
+    .loader-text {
+      color: #ffaa66;
+      font-size: 10px;
+      letter-spacing: 2px;
+    }
+
     .modal {
       display: none;
       position: fixed;
       inset: 0;
-      background: rgba(0, 0, 0, 0.85);
+      background: rgba(0, 0, 0, 0.9);
       z-index: 999;
       justify-content: center;
       align-items: center;
       backdrop-filter: blur(3px);
+      touch-action: manipulation;
     }
 
     .modal-content {
-      width: 550px;
-      max-width: 90%;
+      width: 90%;
+      max-width: 520px;
+      max-height: 85vh;
       background: linear-gradient(135deg, #1a1a2e, #0f0f1a);
       border: 3px solid #ffaa44;
       box-shadow: 0 0 30px rgba(255, 170, 68, 0.4);
       padding: 0;
       animation: slideUp 0.2s ease;
+      overflow-y: auto;
     }
 
     @keyframes slideUp {
@@ -83,13 +124,15 @@
 
     .modal-header {
       background: linear-gradient(90deg, #2a1a0a, #1a0f05);
-      padding: 15px 20px;
+      padding: 12px 16px;
       border-bottom: 2px solid #ffaa44;
       text-align: center;
+      position: sticky;
+      top: 0;
     }
 
     .modal-name {
-      font-size: 22px;
+      font-size: 18px;
       color: #ffcc66;
       letter-spacing: 2px;
       font-weight: bold;
@@ -97,34 +140,34 @@
     }
 
     .modal-year {
-      font-size: 12px;
+      font-size: 11px;
       color: #ff8866;
-      margin-top: 5px;
+      margin-top: 4px;
     }
 
     .modal-body {
-      padding: 20px;
+      padding: 16px;
     }
 
     .info-block {
       background: rgba(0, 0, 0, 0.4);
-      margin-bottom: 14px;
-      padding: 12px 14px;
+      margin-bottom: 12px;
+      padding: 10px 12px;
       border-left: 4px solid #ffaa44;
     }
 
     .info-label {
       color: #ffaa66;
-      font-size: 11px;
+      font-size: 10px;
       letter-spacing: 2px;
-      margin-bottom: 8px;
+      margin-bottom: 6px;
       text-transform: uppercase;
     }
 
     .info-value {
       color: #eeddbb;
-      font-size: 13px;
-      line-height: 1.6;
+      font-size: 12px;
+      line-height: 1.5;
     }
 
     .close-btn {
@@ -139,11 +182,31 @@
       width: 100%;
       transition: 0.2s;
       font-weight: bold;
+      touch-action: manipulation;
     }
 
     .close-btn:hover {
       background: #ffaa44;
       color: #0a0a1a;
+    }
+
+    @media (max-width: 768px) {
+      .info-value {
+        font-size: 11px;
+      }
+      .modal-name {
+        font-size: 16px;
+      }
+      .modal-body {
+        padding: 12px;
+      }
+      .info-block {
+        padding: 8px 10px;
+      }
+      .frame {
+        inset: 4px;
+        border-width: 2px;
+      }
     }
   </style>
 </head>
@@ -152,6 +215,11 @@
 <canvas id="mapCanvas"></canvas>
 <div class="frame"></div>
 <div class="quote">«Надо жить, надо любить, надо верить...» — Лев Толстой</div>
+
+<div id="loader" class="loader">
+  <div class="pixel-loader"></div>
+  <div class="loader-text">ЗАГРУЗКА КАРТЫ...</div>
+</div>
 
 <div id="modal" class="modal">
   <div class="modal-content">
@@ -196,6 +264,9 @@
   let time = 0;
   let mouseX = 0;
   let mouseY = 0;
+  let mapLoaded = false;
+
+  const loader = document.getElementById('loader');
 
   const iconData = {
     warrior: [
@@ -254,7 +325,6 @@
     ]
   };
 
-  // ===== РАСШИРЕННЫЕ БИОГРАФИИ (по тексту романа) =====
   const heroes = [
     { 
       name: 'Анатоль Курагин', 
@@ -341,10 +411,9 @@
 
   function drawMap() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
-    if (!mapImage.complete || mapImage.naturalWidth === 0) {
-      ctx.fillStyle = '#ff6666';
-      ctx.font = '16px monospace';
-      ctx.fillText('ОШИБКА: map.jpg не найден!', canvas.width/2 - 150, canvas.height/2);
+    if (!mapLoaded) {
+      ctx.fillStyle = '#0a0a1a';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
       return;
     }
     const imageRatio = ORIGINAL_WIDTH / ORIGINAL_HEIGHT;
@@ -366,7 +435,7 @@
     heroes.forEach(hero => {
       const x = toCanvasX(hero.x);
       const y = toCanvasY(hero.y);
-      let iconSize = Math.max(28, drawWidth / ORIGINAL_WIDTH * 36);
+      let iconSize = Math.max(28, Math.min(60, drawWidth / ORIGINAL_WIDTH * 36));
       let isHovered = (hoveredHero === hero);
       
       if (isHovered) {
@@ -381,7 +450,7 @@
       drawPixelIcon(x, y, iconSize, hero.iconType, hero.color);
       ctx.shadowBlur = 0;
       
-      let fontSize = Math.max(12, iconSize / 2.2);
+      let fontSize = Math.max(11, Math.min(20, iconSize / 2.2));
       ctx.font = `bold ${fontSize}px 'Courier New', monospace`;
       
       ctx.fillStyle = '#000000';
@@ -402,10 +471,27 @@
     canvas.style.cursor = over ? 'pointer' : 'default';
   }
 
+  function handleTap(clientX, clientY) {
+    const rect = canvas.getBoundingClientRect();
+    const scaleX = canvas.width / rect.width;
+    const scaleY = canvas.height / rect.height;
+    const tapX = (clientX - rect.left) * scaleX;
+    const tapY = (clientY - rect.top) * scaleY;
+    
+    heroes.forEach(hero => {
+      const x = toCanvasX(hero.x);
+      const y = toCanvasY(hero.y);
+      const size = Math.max(28, drawWidth / ORIGINAL_WIDTH * 36);
+      if (tapX >= x - size/2 && tapX <= x + size/2 && tapY >= y - size/2 && tapY <= y + size/2) {
+        openModal(hero);
+      }
+    });
+  }
+
   canvas.addEventListener('mousemove', (e) => {
     const rect = canvas.getBoundingClientRect();
-    mouseX = e.clientX - rect.left;
-    mouseY = e.clientY - rect.top;
+    mouseX = (e.clientX - rect.left) * (canvas.width / rect.width);
+    mouseY = (e.clientY - rect.top) * (canvas.height / rect.height);
     let newHovered = null;
     heroes.forEach(hero => {
       const x = toCanvasX(hero.x);
@@ -419,15 +505,33 @@
 
   canvas.addEventListener('click', (e) => {
     const rect = canvas.getBoundingClientRect();
-    const mx = e.clientX - rect.left;
-    const my = e.clientY - rect.top;
+    const clickX = (e.clientX - rect.left) * (canvas.width / rect.width);
+    const clickY = (e.clientY - rect.top) * (canvas.height / rect.height);
     heroes.forEach(hero => {
       const x = toCanvasX(hero.x);
       const y = toCanvasY(hero.y);
       const size = Math.max(28, drawWidth / ORIGINAL_WIDTH * 36);
-      if (mx >= x - size/2 && mx <= x + size/2 && my >= y - size/2 && my <= y + size/2) openModal(hero);
+      if (clickX >= x - size/2 && clickX <= x + size/2 && clickY >= y - size/2 && clickY <= y + size/2) {
+        openModal(hero);
+      }
     });
   });
+
+  canvas.addEventListener('touchstart', (e) => {
+    e.preventDefault();
+    const rect = canvas.getBoundingClientRect();
+    const touch = e.touches[0];
+    const tapX = (touch.clientX - rect.left) * (canvas.width / rect.width);
+    const tapY = (touch.clientY - rect.top) * (canvas.height / rect.height);
+    heroes.forEach(hero => {
+      const x = toCanvasX(hero.x);
+      const y = toCanvasY(hero.y);
+      const size = Math.max(28, drawWidth / ORIGINAL_WIDTH * 36);
+      if (tapX >= x - size/2 && tapX <= x + size/2 && tapY >= y - size/2 && tapY <= y + size/2) {
+        openModal(hero);
+      }
+    });
+  }, { passive: false });
 
   function openModal(hero) {
     document.getElementById('modalName').textContent = hero.name;
@@ -441,10 +545,39 @@
   function closeModal() { document.getElementById('modal').style.display = 'none'; }
 
   function animate() { time += 0.05; drawMap(); requestAnimationFrame(animate); }
-  function resizeCanvas() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; drawMap(); }
+  
+  function resizeCanvas() {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+    drawMap();
+  }
+
   window.addEventListener('resize', resizeCanvas);
-  mapImage.onload = () => { ORIGINAL_WIDTH = mapImage.width; ORIGINAL_HEIGHT = mapImage.height; resizeCanvas(); animate(); };
-  mapImage.onerror = () => resizeCanvas();
+  
+  mapImage.onload = () => {
+    ORIGINAL_WIDTH = mapImage.width;
+    ORIGINAL_HEIGHT = mapImage.height;
+    mapLoaded = true;
+    resizeCanvas();
+    animate();
+    setTimeout(() => {
+      loader.classList.add('hide');
+      setTimeout(() => { loader.style.display = 'none'; }, 500);
+    }, 500);
+  };
+  
+  mapImage.onerror = () => {
+    mapLoaded = true;
+    ORIGINAL_WIDTH = 1100;
+    ORIGINAL_HEIGHT = 750;
+    resizeCanvas();
+    animate();
+    setTimeout(() => {
+      loader.classList.add('hide');
+      setTimeout(() => { loader.style.display = 'none'; }, 500);
+    }, 500);
+  };
+
   resizeCanvas();
 </script>
 
