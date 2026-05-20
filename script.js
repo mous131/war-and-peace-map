@@ -15,59 +15,71 @@ let drawHeight = 0;
 let offsetX = 0;
 let offsetY = 0;
 
+// Для анимации
 let hoveredHero = null;
 let time = 0;
-
 let mouseX = 0;
 let mouseY = 0;
 
+// ===== ГЕРОИ С ПОЛНЫМИ ДАННЫМИ =====
 const heroes = [
     {
         name: 'Анатоль Курагин',
+        birthYear: 'ок. 1780',
+        deathYear: '1812',
+        deathPlace: 'После Бородинского сражения',
         x: 1004, y: 414,
         color: '#d13a2f',
-        bio: 'Ранен под Бородино, умер от гангрены.'
+        bio: 'Красавец и повеса, брат Элен. Участвовал в Бородинском сражении, где был тяжело ранен. Ему ампутировали ногу, но спасти не смогли. Умер от гангрены.'
     },
     {
         name: 'Петя Ростов',
+        birthYear: '1797',
+        deathYear: '1812',
+        deathPlace: 'Под Вязьмой',
         x: 965, y: 482,
         color: '#ff5555',
-        bio: '15-летний юноша. Погиб в партизанском бою под Вязьмой.'
+        bio: 'Младший сын графа Ростова. В 15 лет ушёл на войну. Погиб в партизанском бою, бросившись вперёд лошади. Его смерть стала тяжёлым ударом для семьи.'
     },
     {
-        name: 'Князь Болконский',
+        name: 'Князь Николай Болконский',
+        birthYear: '1736',
+        deathYear: '1812',
+        deathPlace: 'Лысые Горы',
         x: 1270, y: 235,
         color: '#992222',
-        bio: 'Старый князь. Умер в Лысых Горах при приближении французов.'
+        bio: 'Старый князь, отец Андрея. При приближении французов отказался бежать. Был разбит параличом и умер в своём имении.'
     },
     {
         name: 'Элен Безухова',
+        birthYear: '1785',
+        deathYear: '1812',
+        deathPlace: 'Санкт-Петербург',
         x: 848, y: 127,
         color: '#e6b85c',
-        bio: 'Светская красавица. Умерла в Петербурге в 1812 году.'
+        bio: 'Светская красавица, жена Пьера. Умерла при загадочных обстоятельствах (от сердечного приступа или последствий неудачного аборта).'
     },
     {
         name: 'Михаил Кутузов',
+        birthYear: '1745',
+        deathYear: '1813',
+        deathPlace: 'Бунцлау, Силезия',
         x: 481, y: 551,
         color: '#c9a227',
-        bio: 'Великий полководец. Умер в Бунцлау в 1813 году.'
+        bio: 'Главнокомандующий русской армией. Сдал Москву, чтобы сохранить армию. Умер через год после изгнания Наполеона.'
     },
     {
-        name: 'Наполеон',
+        name: 'Наполеон Бонапарт',
+        birthYear: '1769',
+        deathYear: '1821',
+        deathPlace: 'Остров Святой Елены',
         x: 68, y: 630,
         color: '#555',
-        bio: 'Император Франции. Умер в ссылке на острове Святой Елены в 1821 году.'
+        bio: 'Император Франции. Вторгся в Россию с 600-тысячной армией, занял пустую Москву, позорно бежал. Умер в ссылке от рака желудка.'
     }
 ];
 
-function resizeCanvas() {
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
-    drawMap();
-}
-
-window.addEventListener('resize', resizeCanvas);
-
+// ===== ФУНКЦИИ ПЕРЕСЧЁТА =====
 function toCanvasX(x) {
     return offsetX + (x / ORIGINAL_WIDTH) * drawWidth;
 }
@@ -76,6 +88,7 @@ function toCanvasY(y) {
     return offsetY + (y / ORIGINAL_HEIGHT) * drawHeight;
 }
 
+// ===== ОТРИСОВКА КАРТЫ =====
 function drawMap() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     
@@ -83,9 +96,6 @@ function drawMap() {
         ctx.fillStyle = '#ff6666';
         ctx.font = '16px monospace';
         ctx.fillText('ОШИБКА: Файл map.jpg не найден!', canvas.width/2 - 200, canvas.height/2);
-        ctx.fillStyle = '#c99a2e';
-        ctx.font = '12px monospace';
-        ctx.fillText('Проверь: файл карты должен называться map.jpg', canvas.width/2 - 200, canvas.height/2 + 30);
         return;
     }
     
@@ -107,6 +117,7 @@ function drawMap() {
     drawHeroes();
 }
 
+// ===== ОТРИСОВКА ГЕРОЕВ С АНИМАЦИЕЙ =====
 function drawHeroes() {
     heroes.forEach(hero => {
         const x = toCanvasX(hero.x);
@@ -129,18 +140,23 @@ function drawHeroes() {
             ctx.shadowBlur = 8;
         }
 
+        // Голова
         ctx.fillStyle = '#ffd39a';
         ctx.fillRect(x - scale, y - scale * 4, scale * 2, scale * 2);
         
+        // Тело
         ctx.fillStyle = hero.color;
         ctx.fillRect(x - scale * 1.5, y - scale * 2, scale * 3, scale * 3);
         
+        // Пояс
         ctx.fillStyle = '#700';
         ctx.fillRect(x - scale * 2, y - scale * 1.5, scale * 4, scale);
         
+        // Оружие/символ
         ctx.fillStyle = '#ffd700';
         ctx.fillRect(x + scale * 2, y - scale * 2, scale, scale * 4);
         
+        // Блик при наведении
         if (isHovered) {
             ctx.fillStyle = 'rgba(255,255,200,0.6)';
             ctx.fillRect(x - scale * 1.2, y - scale * 3.5, scale * 2.4, scale * 1.2);
@@ -148,6 +164,7 @@ function drawHeroes() {
         
         ctx.shadowBlur = 0;
         
+        // Имя героя
         let fontSize = 14;
         let nameOffsetX = 18;
         let nameOffsetY = -10;
@@ -168,18 +185,13 @@ function drawHeroes() {
 
 // ===== СМЕНА КУРСОРА =====
 function updateCursor() {
-    const rect = canvas.getBoundingClientRect();
-    const mx = mouseX;
-    const my = mouseY;
-    
     let isOverHero = false;
     
     heroes.forEach(hero => {
         const x = toCanvasX(hero.x);
         const y = toCanvasY(hero.y);
-        const scale = Math.max(2, drawWidth / ORIGINAL_WIDTH * 4);
         
-        if (mx >= x - 30 && mx <= x + 30 && my >= y - 35 && my <= y + 35) {
+        if (mouseX >= x - 30 && mouseX <= x + 30 && mouseY >= y - 35 && mouseY <= y + 35) {
             isOverHero = true;
         }
     });
@@ -197,7 +209,6 @@ canvas.addEventListener('mousemove', (e) => {
     heroes.forEach(hero => {
         const x = toCanvasX(hero.x);
         const y = toCanvasY(hero.y);
-        const scale = Math.max(2, drawWidth / ORIGINAL_WIDTH * 4);
         
         if (mouseX >= x - 30 && mouseX <= x + 30 && mouseY >= y - 35 && mouseY <= y + 35) {
             newHovered = hero;
@@ -208,7 +219,7 @@ canvas.addEventListener('mousemove', (e) => {
     updateCursor();
 });
 
-// ===== КЛИК =====
+// ===== КЛИК ПО ГЕРОЮ =====
 canvas.addEventListener('click', (e) => {
     const rect = canvas.getBoundingClientRect();
     const mx = e.clientX - rect.left;
@@ -224,6 +235,19 @@ canvas.addEventListener('click', (e) => {
     });
 });
 
+// ===== МОДАЛЬНОЕ ОКНО =====
+function openModal(hero) {
+    document.getElementById('modalName').textContent = hero.name;
+    document.getElementById('modalDates').textContent = `${hero.birthYear} — ${hero.deathYear}`;
+    document.getElementById('modalDeathPlace').textContent = hero.deathPlace;
+    document.getElementById('modalBio').textContent = hero.bio;
+    document.getElementById('modal').style.display = 'flex';
+}
+
+function closeModal() {
+    document.getElementById('modal').style.display = 'none';
+}
+
 // ===== АНИМАЦИЯ =====
 function animate() {
     time += 0.05;
@@ -231,16 +255,14 @@ function animate() {
     requestAnimationFrame(animate);
 }
 
-// ===== МОДАЛЬНОЕ ОКНО =====
-function openModal(hero) {
-    document.getElementById('modal').style.display = 'flex';
-    document.getElementById('modalTitle').textContent = hero.name;
-    document.getElementById('modalText').textContent = hero.bio;
+// ===== RESIZE =====
+function resizeCanvas() {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+    drawMap();
 }
 
-function closeModal() {
-    document.getElementById('modal').style.display = 'none';
-}
+window.addEventListener('resize', resizeCanvas);
 
 // ===== ЗАПУСК =====
 mapImage.onload = () => {
@@ -252,6 +274,7 @@ mapImage.onload = () => {
 
 mapImage.onerror = () => {
     resizeCanvas();
+    console.error('Ошибка: map.jpg не найден');
 };
 
 resizeCanvas();
