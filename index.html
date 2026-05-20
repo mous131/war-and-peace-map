@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Война и Мир — Судьба человека в исторических катастрофах</title>
+  <title>Война и Мир — Судьба человека</title>
   <style>
     * {
       margin: 0;
@@ -29,112 +29,119 @@
       cursor: default;
     }
 
-    .ui-title {
+    /* Пиксельная рамка */
+    canvas::after {
+      content: '';
       position: fixed;
-      top: 20px;
-      left: 20px;
-      z-index: 100;
-      color: #d8b35f;
-      background: rgba(0, 0, 0, 0.85);
-      border: 3px solid #d8b35f;
-      padding: 10px 14px;
-      font-size: 16px;
-      text-align: center;
-      letter-spacing: 2px;
-      backdrop-filter: blur(4px);
+      inset: 10px;
+      pointer-events: none;
+      border: 3px solid #d4a73c;
     }
 
-    /* ===== МОДАЛЬНОЕ ОКНО (RPG КАРТОЧКА) ===== */
+    /* Цитата внизу */
+    .quote {
+      position: fixed;
+      bottom: 15px;
+      left: 0;
+      right: 0;
+      text-align: center;
+      color: #8a7a5a;
+      font-size: 9px;
+      font-family: monospace;
+      background: rgba(0,0,0,0.6);
+      padding: 5px;
+      z-index: 100;
+      letter-spacing: 1px;
+    }
+
+    /* ===== МОДАЛЬНОЕ ОКНО (НОВЫЙ ДИЗАЙН) ===== */
     .modal {
       display: none;
       position: fixed;
       inset: 0;
-      background: rgba(0, 0, 0, 0.85);
+      background: rgba(0, 0, 0, 0.9);
       z-index: 999;
       justify-content: center;
       align-items: center;
+      backdrop-filter: blur(2px);
     }
 
     .modal-content {
-      width: 520px;
-      max-width: 90%;
-      background: #0a0a0f;
-      border: 4px solid #d4a73c;
-      box-shadow: 0 0 25px rgba(212, 167, 60, 0.3);
+      width: 480px;
+      max-width: 85%;
+      background: #0d0a05;
+      border-left: 6px solid #8b2a1a;
+      border-right: 1px solid #2a2a20;
+      border-top: 1px solid #2a2a20;
+      border-bottom: 1px solid #2a2a20;
+      box-shadow: 0 0 30px rgba(0,0,0,0.8);
       padding: 0;
-      overflow: hidden;
-      animation: fadeIn 0.2s ease;
+      animation: slideUp 0.2s ease;
     }
 
-    @keyframes fadeIn {
-      from { opacity: 0; transform: scale(0.95); }
-      to { opacity: 1; transform: scale(1); }
+    @keyframes slideUp {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
     }
 
     .modal-header {
-      background: linear-gradient(135deg, #1a0f05, #0a0500);
-      border-bottom: 3px solid #d4a73c;
+      background: #0a0804;
       padding: 18px 20px;
-      text-align: center;
+      border-bottom: 1px solid #2a2a20;
     }
 
-    .modal-header .modal-name {
+    .modal-name {
       font-size: 20px;
-      color: #ffd966;
-      letter-spacing: 3px;
-      text-shadow: 2px 2px 0 #3a1f00;
+      color: #c99a2e;
+      letter-spacing: 2px;
+      font-weight: bold;
+    }
+
+    .modal-year {
+      font-size: 11px;
+      color: #6a5a3a;
+      margin-top: 6px;
     }
 
     .modal-body {
       padding: 20px;
-      display: flex;
-      flex-direction: column;
-      gap: 15px;
     }
 
-    .modal-block {
-      background: #111115;
-      border: 2px solid #2a2a35;
-      padding: 12px 15px;
-      transition: 0.1s;
+    .info-line {
+      margin-bottom: 18px;
+      border-bottom: 1px dashed #1f1f18;
+      padding-bottom: 12px;
     }
 
-    .modal-block:hover {
-      border-color: #d4a73c;
-      background: #14141a;
-    }
-
-    .modal-block-title {
-      color: #d4a73c;
+    .info-label {
+      color: #8b2a1a;
       font-size: 10px;
-      letter-spacing: 2px;
-      margin-bottom: 8px;
+      letter-spacing: 1px;
+      margin-bottom: 6px;
       text-transform: uppercase;
-      display: flex;
-      align-items: center;
-      gap: 8px;
     }
 
-    .modal-block-title span {
-      font-size: 14px;
-    }
-
-    .modal-block-content {
-      color: #f0ddb1;
+    .info-value {
+      color: #d8c89a;
       font-size: 13px;
       line-height: 1.5;
-      word-break: break-word;
     }
 
     .close-btn {
-      background: #1a0f05;
+      background: #0a0804;
       border: none;
-      border-top: 3px solid #d4a73c;
-      color: #d4a73c;
+      border-top: 1px solid #2a2a20;
+      color: #8b2a1a;
       padding: 12px 20px;
       cursor: pointer;
-      font-family: 'Courier New', monospace;
-      font-size: 13px;
+      font-family: monospace;
+      font-size: 12px;
       width: 100%;
       transition: 0.2s;
       font-weight: bold;
@@ -142,57 +149,42 @@
     }
 
     .close-btn:hover {
-      background: #d4a73c;
-      color: #0a0a0f;
+      background: #1f1a10;
+      color: #c99a2e;
     }
   </style>
 </head>
 <body>
 
-<div class="ui-title">
-  ⚔️ ВОЙНА И МИР ⚔️<br>
-  <span style="font-size: 10px;">Судьба человека в условиях исторических катастроф</span>
-</div>
-
 <canvas id="mapCanvas"></canvas>
+
+<div class="quote">«Надо жить, надо любить, надо верить...» — Лев Толстой</div>
 
 <div id="modal" class="modal">
   <div class="modal-content">
     <div class="modal-header">
       <div class="modal-name" id="modalName"></div>
+      <div class="modal-year" id="modalYear"></div>
     </div>
     <div class="modal-body">
-      
-      <div class="modal-block">
-        <div class="modal-block-title">
-          <span>⚔</span> СТАТУС
-        </div>
-        <div class="modal-block-content" id="modalStatus">—</div>
+      <div class="info-line">
+        <div class="info-label">⚔ СТАТУС</div>
+        <div class="info-value" id="modalStatus"></div>
       </div>
-      
-      <div class="modal-block">
-        <div class="modal-block-title">
-          <span>📅</span> ДАТЫ ЖИЗНИ
-        </div>
-        <div class="modal-block-content" id="modalDates">—</div>
+      <div class="info-line">
+        <div class="info-label">📅 ДАТЫ</div>
+        <div class="info-value" id="modalDates"></div>
       </div>
-      
-      <div class="modal-block">
-        <div class="modal-block-title">
-          <span>📍</span> МЕСТО СМЕРТИ
-        </div>
-        <div class="modal-block-content" id="modalDeathPlace">—</div>
+      <div class="info-line">
+        <div class="info-label">📍 МЕСТО</div>
+        <div class="info-value" id="modalDeathPlace"></div>
       </div>
-      
-      <div class="modal-block">
-        <div class="modal-block-title">
-          <span>📜</span> БИОГРАФИЯ
-        </div>
-        <div class="modal-block-content" id="modalBio">—</div>
+      <div class="info-line">
+        <div class="info-label">📖 БИОГРАФИЯ</div>
+        <div class="info-value" id="modalBio"></div>
       </div>
-      
     </div>
-    <button class="close-btn" onclick="closeModal()">✖ ЗАКРЫТЬ</button>
+    <button class="close-btn" onclick="closeModal()">ЗАКРЫТЬ</button>
   </div>
 </div>
 
@@ -233,7 +225,7 @@
       deathPlace: 'Под Вязьмой',
       x: 965, y: 482,
       color: '#ff5555',
-      bio: 'Младший сын графа Ростова. В 15 лет ушёл на войну. Погиб в партизанском бою, бросившись вперёд лошади. Его смерть стала тяжёлым ударом для семьи.'
+      bio: 'Младший сын графа Ростова. В 15 лет ушёл на войну. Погиб в партизанском бою, бросившись вперёд лошади.'
     },
     {
       name: 'Князь Николай Болконский',
@@ -251,7 +243,7 @@
       deathPlace: 'Санкт-Петербург',
       x: 848, y: 127,
       color: '#e6b85c',
-      bio: 'Светская красавица, жена Пьера. Умерла при загадочных обстоятельствах (от сердечного приступа или последствий неудачного аборта).'
+      bio: 'Светская красавица, жена Пьера. Умерла при загадочных обстоятельствах.'
     },
     {
       name: 'Михаил Кутузов',
@@ -269,7 +261,7 @@
       deathPlace: 'Остров Святой Елены',
       x: 68, y: 630,
       color: '#555',
-      bio: 'Император Франции. Вторгся в Россию с 600-тысячной армией, занял пустую Москву, позорно бежал. Умер в ссылке от рака желудка.'
+      bio: 'Император Франции. Вторгся в Россию, занял пустую Москву, позорно бежал. Умер в ссылке.'
     }
   ];
 
@@ -311,14 +303,9 @@
       let scale = Math.max(2, drawWidth / ORIGINAL_WIDTH * 4);
       
       let isHovered = (hoveredHero === hero);
-      let animScale = 1;
       
       if (isHovered) {
-        animScale = 1.1 + Math.sin(time * 10) * 0.05;
-        scale = scale * animScale;
-      }
-      
-      if (isHovered) {
+        scale = scale * 1.15;
         ctx.shadowColor = '#ffcc66';
         ctx.shadowBlur = 15;
       } else {
@@ -338,22 +325,11 @@
       ctx.fillStyle = '#ffd700';
       ctx.fillRect(x + scale * 2, y - scale * 2, scale, scale * 4);
       
-      if (isHovered) {
-        ctx.fillStyle = 'rgba(255,255,200,0.6)';
-        ctx.fillRect(x - scale * 1.2, y - scale * 3.5, scale * 2.4, scale * 1.2);
-      }
-      
       ctx.shadowBlur = 0;
       
-      let fontSize = 14;
+      let fontSize = 13;
       let nameOffsetX = 18;
       let nameOffsetY = -10;
-      
-      if (isHovered) {
-        fontSize = 15;
-        nameOffsetX = 19;
-        nameOffsetY = -11;
-      }
       
       ctx.font = `${fontSize}px 'Courier New', monospace`;
       ctx.fillStyle = '#000';
@@ -408,13 +384,11 @@
 
   function openModal(hero) {
     document.getElementById('modalName').textContent = hero.name;
+    document.getElementById('modalYear').textContent = hero.deathYear ? `† ${hero.deathYear}` : '';
     
-    let status = hero.deathYear ? '✝ Погиб / умер' : '✓ Выжил';
-    if (hero.name === 'Наполеон Бонапарт') status = '✝ Умер в ссылке';
-    if (hero.name === 'Элен Безухова') status = '✝ Скоропостижно скончалась';
-    
+    let status = hero.deathYear ? 'ПОГИБ / УМЕР' : 'ВЫЖИЛ';
     document.getElementById('modalStatus').textContent = status;
-    document.getElementById('modalDates').textContent = `${hero.birthYear} — ${hero.deathYear || 'выжил'}`;
+    document.getElementById('modalDates').textContent = `${hero.birthYear} — ${hero.deathYear || '...'}`;
     document.getElementById('modalDeathPlace').textContent = hero.deathPlace || '—';
     document.getElementById('modalBio').textContent = hero.bio;
     document.getElementById('modal').style.display = 'flex';
