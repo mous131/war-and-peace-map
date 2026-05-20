@@ -4,7 +4,148 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Война и Мир — Судьба человека в исторических катастрофах</title>
-  <link rel="stylesheet" href="style.css">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    html, body {
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background: #000;
+      font-family: 'Courier New', monospace;
+    }
+
+    canvas {
+      position: fixed;
+      inset: 0;
+      width: 100vw;
+      height: 100vh;
+      display: block;
+      background: #000;
+      cursor: default;
+    }
+
+    .ui-title {
+      position: fixed;
+      top: 20px;
+      left: 20px;
+      z-index: 100;
+      color: #d8b35f;
+      background: rgba(0, 0, 0, 0.85);
+      border: 3px solid #d8b35f;
+      padding: 10px 14px;
+      font-size: 16px;
+      text-align: center;
+      letter-spacing: 2px;
+      backdrop-filter: blur(4px);
+    }
+
+    /* ===== МОДАЛЬНОЕ ОКНО (RPG КАРТОЧКА) ===== */
+    .modal {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.85);
+      z-index: 999;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .modal-content {
+      width: 520px;
+      max-width: 90%;
+      background: #0a0a0f;
+      border: 4px solid #d4a73c;
+      box-shadow: 0 0 25px rgba(212, 167, 60, 0.3);
+      padding: 0;
+      overflow: hidden;
+      animation: fadeIn 0.2s ease;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: scale(0.95); }
+      to { opacity: 1; transform: scale(1); }
+    }
+
+    .modal-header {
+      background: linear-gradient(135deg, #1a0f05, #0a0500);
+      border-bottom: 3px solid #d4a73c;
+      padding: 18px 20px;
+      text-align: center;
+    }
+
+    .modal-header .modal-name {
+      font-size: 20px;
+      color: #ffd966;
+      letter-spacing: 3px;
+      text-shadow: 2px 2px 0 #3a1f00;
+    }
+
+    .modal-body {
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+    }
+
+    .modal-block {
+      background: #111115;
+      border: 2px solid #2a2a35;
+      padding: 12px 15px;
+      transition: 0.1s;
+    }
+
+    .modal-block:hover {
+      border-color: #d4a73c;
+      background: #14141a;
+    }
+
+    .modal-block-title {
+      color: #d4a73c;
+      font-size: 10px;
+      letter-spacing: 2px;
+      margin-bottom: 8px;
+      text-transform: uppercase;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .modal-block-title span {
+      font-size: 14px;
+    }
+
+    .modal-block-content {
+      color: #f0ddb1;
+      font-size: 13px;
+      line-height: 1.5;
+      word-break: break-word;
+    }
+
+    .close-btn {
+      background: #1a0f05;
+      border: none;
+      border-top: 3px solid #d4a73c;
+      color: #d4a73c;
+      padding: 12px 20px;
+      cursor: pointer;
+      font-family: 'Courier New', monospace;
+      font-size: 13px;
+      width: 100%;
+      transition: 0.2s;
+      font-weight: bold;
+      letter-spacing: 2px;
+    }
+
+    .close-btn:hover {
+      background: #d4a73c;
+      color: #0a0a0f;
+    }
+  </style>
 </head>
 <body>
 
@@ -21,24 +162,295 @@
       <div class="modal-name" id="modalName"></div>
     </div>
     <div class="modal-body">
-      <div class="modal-section">
-        <div class="modal-section-title">📅 ДАТЫ ЖИЗНИ</div>
-        <div class="modal-section-content" id="modalDates">—</div>
+      
+      <div class="modal-block">
+        <div class="modal-block-title">
+          <span>⚔</span> СТАТУС
+        </div>
+        <div class="modal-block-content" id="modalStatus">—</div>
       </div>
-      <div class="modal-section">
-        <div class="modal-section-title">📍 МЕСТО СМЕРТИ</div>
-        <div class="modal-section-content" id="modalDeathPlace">—</div>
+      
+      <div class="modal-block">
+        <div class="modal-block-title">
+          <span>📅</span> ДАТЫ ЖИЗНИ
+        </div>
+        <div class="modal-block-content" id="modalDates">—</div>
       </div>
-      <div class="modal-section">
-        <div class="modal-section-title">📖 БИОГРАФИЯ</div>
-        <div class="modal-section-content" id="modalBio">—</div>
+      
+      <div class="modal-block">
+        <div class="modal-block-title">
+          <span>📍</span> МЕСТО СМЕРТИ
+        </div>
+        <div class="modal-block-content" id="modalDeathPlace">—</div>
       </div>
+      
+      <div class="modal-block">
+        <div class="modal-block-title">
+          <span>📜</span> БИОГРАФИЯ
+        </div>
+        <div class="modal-block-content" id="modalBio">—</div>
+      </div>
+      
     </div>
     <button class="close-btn" onclick="closeModal()">✖ ЗАКРЫТЬ</button>
   </div>
 </div>
 
-<script src="script.js"></script>
+<script>
+  const canvas = document.getElementById('mapCanvas');
+  const ctx = canvas.getContext('2d');
+  ctx.imageSmoothingEnabled = false;
+
+  const mapImage = new Image();
+  mapImage.src = 'map.jpg';
+
+  let ORIGINAL_WIDTH = 1;
+  let ORIGINAL_HEIGHT = 1;
+  let drawWidth = 0;
+  let drawHeight = 0;
+  let offsetX = 0;
+  let offsetY = 0;
+
+  let hoveredHero = null;
+  let time = 0;
+  let mouseX = 0;
+  let mouseY = 0;
+
+  const heroes = [
+    {
+      name: 'Анатоль Курагин',
+      birthYear: 'ок. 1780',
+      deathYear: '1812',
+      deathPlace: 'После Бородинского сражения',
+      x: 1004, y: 414,
+      color: '#d13a2f',
+      bio: 'Красавец и повеса, брат Элен. Участвовал в Бородинском сражении, где был тяжело ранен. Ему ампутировали ногу, но спасти не смогли. Умер от гангрены.'
+    },
+    {
+      name: 'Петя Ростов',
+      birthYear: '1797',
+      deathYear: '1812',
+      deathPlace: 'Под Вязьмой',
+      x: 965, y: 482,
+      color: '#ff5555',
+      bio: 'Младший сын графа Ростова. В 15 лет ушёл на войну. Погиб в партизанском бою, бросившись вперёд лошади. Его смерть стала тяжёлым ударом для семьи.'
+    },
+    {
+      name: 'Князь Николай Болконский',
+      birthYear: '1736',
+      deathYear: '1812',
+      deathPlace: 'Лысые Горы',
+      x: 1270, y: 235,
+      color: '#992222',
+      bio: 'Старый князь, отец Андрея. При приближении французов отказался бежать. Был разбит параличом и умер в своём имении.'
+    },
+    {
+      name: 'Элен Безухова',
+      birthYear: '1785',
+      deathYear: '1812',
+      deathPlace: 'Санкт-Петербург',
+      x: 848, y: 127,
+      color: '#e6b85c',
+      bio: 'Светская красавица, жена Пьера. Умерла при загадочных обстоятельствах (от сердечного приступа или последствий неудачного аборта).'
+    },
+    {
+      name: 'Михаил Кутузов',
+      birthYear: '1745',
+      deathYear: '1813',
+      deathPlace: 'Бунцлау, Силезия',
+      x: 481, y: 551,
+      color: '#c9a227',
+      bio: 'Главнокомандующий русской армией. Сдал Москву, чтобы сохранить армию. Умер через год после изгнания Наполеона.'
+    },
+    {
+      name: 'Наполеон Бонапарт',
+      birthYear: '1769',
+      deathYear: '1821',
+      deathPlace: 'Остров Святой Елены',
+      x: 68, y: 630,
+      color: '#555',
+      bio: 'Император Франции. Вторгся в Россию с 600-тысячной армией, занял пустую Москву, позорно бежал. Умер в ссылке от рака желудка.'
+    }
+  ];
+
+  function toCanvasX(x) { return offsetX + (x / ORIGINAL_WIDTH) * drawWidth; }
+  function toCanvasY(y) { return offsetY + (y / ORIGINAL_HEIGHT) * drawHeight; }
+
+  function drawMap() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    
+    if (!mapImage.complete || mapImage.naturalWidth === 0) {
+      ctx.fillStyle = '#ff6666';
+      ctx.font = '16px monospace';
+      ctx.fillText('ОШИБКА: Файл map.jpg не найден!', canvas.width/2 - 200, canvas.height/2);
+      return;
+    }
+    
+    const imageRatio = ORIGINAL_WIDTH / ORIGINAL_HEIGHT;
+    const canvasRatio = canvas.width / canvas.height;
+
+    if (canvasRatio > imageRatio) {
+      drawHeight = canvas.height;
+      drawWidth = drawHeight * imageRatio;
+    } else {
+      drawWidth = canvas.width;
+      drawHeight = drawWidth / imageRatio;
+    }
+
+    offsetX = (canvas.width - drawWidth) / 2;
+    offsetY = (canvas.height - drawHeight) / 2;
+
+    ctx.drawImage(mapImage, offsetX, offsetY, drawWidth, drawHeight);
+    drawHeroes();
+  }
+
+  function drawHeroes() {
+    heroes.forEach(hero => {
+      const x = toCanvasX(hero.x);
+      const y = toCanvasY(hero.y);
+      let scale = Math.max(2, drawWidth / ORIGINAL_WIDTH * 4);
+      
+      let isHovered = (hoveredHero === hero);
+      let animScale = 1;
+      
+      if (isHovered) {
+        animScale = 1.1 + Math.sin(time * 10) * 0.05;
+        scale = scale * animScale;
+      }
+      
+      if (isHovered) {
+        ctx.shadowColor = '#ffcc66';
+        ctx.shadowBlur = 15;
+      } else {
+        ctx.shadowColor = '#ffcc66';
+        ctx.shadowBlur = 8;
+      }
+
+      ctx.fillStyle = '#ffd39a';
+      ctx.fillRect(x - scale, y - scale * 4, scale * 2, scale * 2);
+      
+      ctx.fillStyle = hero.color;
+      ctx.fillRect(x - scale * 1.5, y - scale * 2, scale * 3, scale * 3);
+      
+      ctx.fillStyle = '#700';
+      ctx.fillRect(x - scale * 2, y - scale * 1.5, scale * 4, scale);
+      
+      ctx.fillStyle = '#ffd700';
+      ctx.fillRect(x + scale * 2, y - scale * 2, scale, scale * 4);
+      
+      if (isHovered) {
+        ctx.fillStyle = 'rgba(255,255,200,0.6)';
+        ctx.fillRect(x - scale * 1.2, y - scale * 3.5, scale * 2.4, scale * 1.2);
+      }
+      
+      ctx.shadowBlur = 0;
+      
+      let fontSize = 14;
+      let nameOffsetX = 18;
+      let nameOffsetY = -10;
+      
+      if (isHovered) {
+        fontSize = 15;
+        nameOffsetX = 19;
+        nameOffsetY = -11;
+      }
+      
+      ctx.font = `${fontSize}px 'Courier New', monospace`;
+      ctx.fillStyle = '#000';
+      ctx.fillText(hero.name, x + nameOffsetX, y + nameOffsetY);
+      ctx.fillStyle = '#ffe2a0';
+      ctx.fillText(hero.name, x + nameOffsetX - 1, y + nameOffsetY - 1);
+    });
+  }
+
+  function updateCursor() {
+    let isOverHero = false;
+    heroes.forEach(hero => {
+      const x = toCanvasX(hero.x);
+      const y = toCanvasY(hero.y);
+      if (mouseX >= x - 30 && mouseX <= x + 30 && mouseY >= y - 35 && mouseY <= y + 35) {
+        isOverHero = true;
+      }
+    });
+    canvas.style.cursor = isOverHero ? 'pointer' : 'default';
+  }
+
+  canvas.addEventListener('mousemove', (e) => {
+    const rect = canvas.getBoundingClientRect();
+    mouseX = e.clientX - rect.left;
+    mouseY = e.clientY - rect.top;
+    
+    let newHovered = null;
+    heroes.forEach(hero => {
+      const x = toCanvasX(hero.x);
+      const y = toCanvasY(hero.y);
+      if (mouseX >= x - 30 && mouseX <= x + 30 && mouseY >= y - 35 && mouseY <= y + 35) {
+        newHovered = hero;
+      }
+    });
+    hoveredHero = newHovered;
+    updateCursor();
+  });
+
+  canvas.addEventListener('click', (e) => {
+    const rect = canvas.getBoundingClientRect();
+    const mx = e.clientX - rect.left;
+    const my = e.clientY - rect.top;
+
+    heroes.forEach(hero => {
+      const x = toCanvasX(hero.x);
+      const y = toCanvasY(hero.y);
+      if (mx >= x - 30 && mx <= x + 30 && my >= y - 35 && my <= y + 35) {
+        openModal(hero);
+      }
+    });
+  });
+
+  function openModal(hero) {
+    document.getElementById('modalName').textContent = hero.name;
+    
+    let status = hero.deathYear ? '✝ Погиб / умер' : '✓ Выжил';
+    if (hero.name === 'Наполеон Бонапарт') status = '✝ Умер в ссылке';
+    if (hero.name === 'Элен Безухова') status = '✝ Скоропостижно скончалась';
+    
+    document.getElementById('modalStatus').textContent = status;
+    document.getElementById('modalDates').textContent = `${hero.birthYear} — ${hero.deathYear || 'выжил'}`;
+    document.getElementById('modalDeathPlace').textContent = hero.deathPlace || '—';
+    document.getElementById('modalBio').textContent = hero.bio;
+    document.getElementById('modal').style.display = 'flex';
+  }
+
+  function closeModal() {
+    document.getElementById('modal').style.display = 'none';
+  }
+
+  function animate() {
+    time += 0.05;
+    drawMap();
+    requestAnimationFrame(animate);
+  }
+
+  function resizeCanvas() {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+    drawMap();
+  }
+
+  window.addEventListener('resize', resizeCanvas);
+
+  mapImage.onload = () => {
+    ORIGINAL_WIDTH = mapImage.width;
+    ORIGINAL_HEIGHT = mapImage.height;
+    resizeCanvas();
+    animate();
+  };
+
+  mapImage.onerror = () => {
+    resizeCanvas();
+  };
+
+  resizeCanvas();
+</script>
 
 </body>
 </html>
