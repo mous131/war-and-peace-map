@@ -29,7 +29,6 @@
       background: #0a0a0f;
     }
     
-    /* Управление (только для мобильных) */
     .mobile-controls {
       position: fixed;
       bottom: 20px;
@@ -68,7 +67,6 @@
     .ctrl-btn:active { background: #8b3a1a; color: #0a0a0f; transform: scale(0.95); }
     .empty { background: transparent; border: none; pointer-events: none; }
     
-    /* Общие элементы */
     .frame { position: fixed; inset: 8px; pointer-events: none; border: 2px solid #8b3a1a; z-index: 50; }
     .quote { position: fixed; bottom: 10px; left: 0; right: 0; text-align: center; color: #8a7a5a; font-size: 8px; background: rgba(10, 10, 15, 0.85); padding: 5px; z-index: 100; letter-spacing: 1px; border-top: 1px solid #3a2a1a; border-bottom: 1px solid #3a2a1a; pointer-events: none; }
     .conclusion-btn { position: fixed; top: 16px; left: 16px; z-index: 150; background: #1a1a1f; border: 2px solid #8b3a1a; color: #c8b88a; padding: 8px 14px; font-family: monospace; font-size: 11px; font-weight: bold; cursor: pointer; border-radius: 6px; }
@@ -178,7 +176,6 @@
   // Определяем устройство
   const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
   
-  // Показываем мобильные кнопки только на телефоне
   if (isMobile) {
     document.getElementById('mobileControls').style.display = 'flex';
   }
@@ -192,7 +189,7 @@
     { name: 'Наполеон', birthYear: '1769', deathYear: '1821 (5 мая)', deathPlace: 'Остров Святой Елены', x: 68, y: 630, color: '#6a6a6a', bio: 'Император Франции. Вторгся в Россию, занял пустую Москву, бежал. Умер в ссылке. «Ничтожное орудие истории».' }
   ];
 
-  function resizeCanvas() {
+  function resizeAndDraw() {
     const container = canvas.parentElement;
     containerWidth = container.clientWidth;
     containerHeight = container.clientHeight;
@@ -206,7 +203,6 @@
   function toOriginalX(cx) { return ((cx - panX) / zoom) / canvas.width * ORIGINAL_WIDTH; }
   function toOriginalY(cy) { return ((cy - panY) / zoom) / canvas.height * ORIGINAL_HEIGHT; }
 
-  // Рисуем иконки (ПК версия — пиксельные)
   function drawPcIcon(x, y, size, color) {
     ctx.fillStyle = color;
     ctx.fillRect(x - size/2, y - size/2, size, size);
@@ -217,7 +213,6 @@
     ctx.fillRect(x - 2, y - size/4, 4, size/2);
   }
   
-  // Рисуем большие точки (мобильная версия)
   function drawMobileIcon(x, y, size, color) {
     ctx.fillStyle = color;
     ctx.beginPath();
@@ -261,6 +256,9 @@
   }
 
   function drawMap() {
+    // ОЧИЩАЕМ ВЕСЬ CANVAS ПЕРЕД ОТРИСОВКОЙ
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    
     if (!mapLoaded || !mapImage.complete) {
       ctx.fillStyle = '#0a0a0f';
       ctx.fillRect(0, 0, canvas.width, canvas.height);
@@ -282,7 +280,7 @@
     document.getElementById('moveLeftBtn').onclick = () => { panX += MOVE_STEP; drawMap(); };
     document.getElementById('moveRightBtn').onclick = () => { panX -= MOVE_STEP; drawMap(); };
   } else {
-    // ПК: зум колесом мыши + панорамирование мышью
+    // ПК: зум колесиком + панорамирование
     let isDragging = false;
     let lastX = 0, lastY = 0;
     
@@ -291,7 +289,7 @@
       const delta = e.deltaY > 0 ? -0.1 : 0.1;
       zoom = Math.min(Math.max(zoom + delta, 0.6), 2.5);
       drawMap();
-    });
+    }, { passive: false });
     
     canvas.addEventListener('mousedown', (e) => {
       isDragging = true;
@@ -317,7 +315,7 @@
     });
   }
 
-  // Клик по герою (универсальный)
+  // Клик по герою
   function checkHit(clientX, clientY) {
     const rect = canvas.getBoundingClientRect();
     const clickX = (clientX - rect.left) * (canvas.width / rect.width);
@@ -360,20 +358,22 @@
   document.getElementById('closeConclusionBtn').onclick = () => document.getElementById('conclusionModal').style.display = 'none';
   window.onclick = (e) => { if (e.target === document.getElementById('conclusionModal')) document.getElementById('conclusionModal').style.display = 'none'; };
 
-  window.addEventListener('resize', resizeCanvas);
+  window.addEventListener('resize', resizeAndDraw);
   
   mapImage.onload = () => {
     ORIGINAL_WIDTH = mapImage.width;
     ORIGINAL_HEIGHT = mapImage.height;
     mapLoaded = true;
-    resizeCanvas();
-    document.getElementById('loader').classList.add('hide');
-  };
-  mapImage.onerror = () => {
+    resizeAndDraw();
     document.getElementById('loader').classList.add('hide');
   };
   
-  resizeCanvas();
+  mapImage.onerror = () => {
+    document.getElementById('loader').classList.add('hide');
+    resizeAndDraw();
+  };
+  
+  resizeAndDraw();
 </script>
 </body>
 </html>
