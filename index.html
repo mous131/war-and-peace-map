@@ -5,252 +5,37 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
   <title>Война и Мир — Судьба человека</title>
   <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-      -webkit-tap-highlight-color: transparent;
-    }
-
-    html, body {
-      width: 100%;
-      height: 100%;
-      overflow: hidden;
-      background: #0a0a0f;
-      font-family: 'Courier New', monospace;
-      touch-action: none;
-    }
-
-    canvas {
-      position: fixed;
-      inset: 0;
-      width: 100vw;
-      height: 100vh;
-      display: block;
-      background: #0a0a0f;
-      cursor: default;
-      touch-action: none;
-    }
-
-    .frame {
-      position: fixed;
-      inset: 8px;
-      pointer-events: none;
-      border: 2px solid #8b3a1a;
-      z-index: 50;
-    }
-
-    .quote {
-      position: fixed;
-      bottom: 10px;
-      left: 0;
-      right: 0;
-      text-align: center;
-      color: #8a7a5a;
-      font-size: 8px;
-      background: rgba(10, 10, 15, 0.85);
-      padding: 5px;
-      z-index: 100;
-      letter-spacing: 1px;
-      border-top: 1px solid #3a2a1a;
-      border-bottom: 1px solid #3a2a1a;
-      pointer-events: none;
-    }
-
-    .loader {
-      position: fixed;
-      inset: 0;
-      background: #0a0a0f;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      z-index: 200;
-      transition: opacity 0.5s ease;
-      flex-direction: column;
-      gap: 15px;
-    }
-    .loader.hide {
-      opacity: 0;
-      pointer-events: none;
-    }
-    .pixel-loader {
-      width: 32px;
-      height: 32px;
-      background: #8b3a1a;
-      animation: pulse 0.8s infinite;
-    }
-    @keyframes pulse {
-      0% { transform: scale(0.8); opacity: 0.5; }
-      50% { transform: scale(1.2); opacity: 1; }
-      100% { transform: scale(0.8); opacity: 0.5; }
-    }
-    .loader-text {
-      color: #8a7a5a;
-      font-size: 9px;
-      letter-spacing: 2px;
-    }
-
-    .conclusion-btn {
-      position: fixed;
-      top: 16px;
-      left: 16px;
-      z-index: 150;
-      background: #1a1a1f;
-      border: 2px solid #8b3a1a;
-      color: #c8b88a;
-      padding: 8px 14px;
-      font-family: 'Courier New', monospace;
-      font-size: 11px;
-      font-weight: bold;
-      cursor: pointer;
-      transition: 0.2s;
-      letter-spacing: 1px;
-      backdrop-filter: blur(2px);
-    }
-    .conclusion-btn:hover {
-      background: #8b3a1a;
-      color: #0a0a0f;
-      border-color: #c8b88a;
-    }
-
-    .conclusion-modal {
-      display: none;
-      position: fixed;
-      inset: 0;
-      background: rgba(10, 10, 15, 0.95);
-      z-index: 300;
-      justify-content: center;
-      align-items: center;
-    }
-    .conclusion-content {
-      width: 90%;
-      max-width: 550px;
-      max-height: 80vh;
-      background: #0f0f14;
-      border: 2px solid #8b3a1a;
-      padding: 20px;
-      overflow-y: auto;
-    }
-    .conclusion-title {
-      color: #c8b88a;
-      font-size: 16px;
-      letter-spacing: 2px;
-      margin-bottom: 15px;
-      text-align: center;
-      border-bottom: 1px solid #3a2a1a;
-      padding-bottom: 8px;
-    }
-    .conclusion-text {
-      color: #b8a87a;
-      font-size: 12px;
-      line-height: 1.6;
-      text-align: justify;
-    }
-    .conclusion-text p {
-      margin-bottom: 12px;
-    }
-    .close-conclusion {
-      background: #1a1a1f;
-      border: 2px solid #8b3a1a;
-      color: #c8b88a;
-      padding: 8px 16px;
-      margin-top: 20px;
-      cursor: pointer;
-      font-family: monospace;
-      width: 100%;
-    }
-
-    .modal {
-      display: none;
-      position: fixed;
-      inset: 0;
-      background: rgba(10, 10, 15, 0.95);
-      z-index: 999;
-      justify-content: center;
-      align-items: center;
-    }
-
-    .modal-content {
-      width: 90%;
-      max-width: 500px;
-      max-height: 85vh;
-      background: #0f0f14;
-      border: 2px solid #8b3a1a;
-      padding: 0;
-      overflow-y: auto;
-    }
-
-    .modal-header {
-      background: #1a1a1f;
-      padding: 12px 16px;
-      border-bottom: 1px solid #3a2a1a;
-      text-align: center;
-      position: sticky;
-      top: 0;
-    }
-
-    .modal-name {
-      font-size: 18px;
-      color: #c8b88a;
-      letter-spacing: 2px;
-      font-weight: bold;
-    }
-
-    .modal-year {
-      font-size: 11px;
-      color: #8a6a4a;
-      margin-top: 4px;
-    }
-
-    .modal-body {
-      padding: 16px;
-    }
-
-    .info-block {
-      margin-bottom: 14px;
-      padding: 8px 12px;
-      border-left: 2px solid #8b3a1a;
-    }
-
-    .info-label {
-      color: #8a6a4a;
-      font-size: 10px;
-      letter-spacing: 1px;
-      margin-bottom: 6px;
-      text-transform: uppercase;
-    }
-
-    .info-value {
-      color: #b8a87a;
-      font-size: 12px;
-      line-height: 1.5;
-    }
-
-    .close-btn {
-      background: #1a1a1f;
-      border: none;
-      border-top: 1px solid #3a2a1a;
-      color: #c8b88a;
-      padding: 12px;
-      cursor: pointer;
-      font-family: monospace;
-      font-size: 12px;
-      width: 100%;
-      transition: 0.2s;
-    }
-
-    .close-btn:hover {
-      background: #8b3a1a;
-      color: #0a0a0f;
-    }
-
-    @media (max-width: 768px) {
-      .info-value { font-size: 11px; }
-      .modal-name { font-size: 16px; }
-      .modal-body { padding: 12px; }
-      .conclusion-title { font-size: 14px; }
-      .conclusion-text { font-size: 11px; }
-    }
+    * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+    html, body { width: 100%; height: 100%; overflow: hidden; background: #0a0a0f; font-family: 'Courier New', monospace; touch-action: none; }
+    canvas { position: fixed; inset: 0; width: 100vw; height: 100vh; display: block; background: #0a0a0f; cursor: default; touch-action: none; }
+    .frame { position: fixed; inset: 8px; pointer-events: none; border: 2px solid #8b3a1a; z-index: 50; }
+    .quote { position: fixed; bottom: 10px; left: 0; right: 0; text-align: center; color: #8a7a5a; font-size: 8px; background: rgba(10, 10, 15, 0.85); padding: 5px; z-index: 100; letter-spacing: 1px; border-top: 1px solid #3a2a1a; border-bottom: 1px solid #3a2a1a; pointer-events: none; }
+    .loader { position: fixed; inset: 0; background: #0a0a0f; display: flex; justify-content: center; align-items: center; z-index: 200; transition: opacity 0.5s ease; flex-direction: column; gap: 15px; }
+    .loader.hide { opacity: 0; pointer-events: none; }
+    .pixel-loader { width: 32px; height: 32px; background: #8b3a1a; animation: pulse 0.8s infinite; }
+    @keyframes pulse { 0% { transform: scale(0.8); opacity: 0.5; } 50% { transform: scale(1.2); opacity: 1; } 100% { transform: scale(0.8); opacity: 0.5; } }
+    .loader-text { color: #8a7a5a; font-size: 9px; letter-spacing: 2px; }
+    .loader-progress { color: #c8b88a; font-size: 11px; margin-top: 5px; }
+    .conclusion-btn { position: fixed; top: 16px; left: 16px; z-index: 150; background: #1a1a1f; border: 2px solid #8b3a1a; color: #c8b88a; padding: 8px 14px; font-family: 'Courier New', monospace; font-size: 11px; font-weight: bold; cursor: pointer; transition: 0.2s; letter-spacing: 1px; backdrop-filter: blur(2px); }
+    .conclusion-btn:hover { background: #8b3a1a; color: #0a0a0f; border-color: #c8b88a; }
+    .conclusion-modal { display: none; position: fixed; inset: 0; background: rgba(10, 10, 15, 0.95); z-index: 300; justify-content: center; align-items: center; }
+    .conclusion-content { width: 90%; max-width: 550px; max-height: 80vh; background: #0f0f14; border: 2px solid #8b3a1a; padding: 20px; overflow-y: auto; }
+    .conclusion-title { color: #c8b88a; font-size: 16px; letter-spacing: 2px; margin-bottom: 15px; text-align: center; border-bottom: 1px solid #3a2a1a; padding-bottom: 8px; }
+    .conclusion-text { color: #b8a87a; font-size: 12px; line-height: 1.6; text-align: justify; }
+    .conclusion-text p { margin-bottom: 12px; }
+    .close-conclusion { background: #1a1a1f; border: 2px solid #8b3a1a; color: #c8b88a; padding: 8px 16px; margin-top: 20px; cursor: pointer; font-family: monospace; width: 100%; }
+    .modal { display: none; position: fixed; inset: 0; background: rgba(10, 10, 15, 0.95); z-index: 999; justify-content: center; align-items: center; }
+    .modal-content { width: 90%; max-width: 500px; max-height: 85vh; background: #0f0f14; border: 2px solid #8b3a1a; padding: 0; overflow-y: auto; }
+    .modal-header { background: #1a1a1f; padding: 12px 16px; border-bottom: 1px solid #3a2a1a; text-align: center; position: sticky; top: 0; }
+    .modal-name { font-size: 18px; color: #c8b88a; letter-spacing: 2px; font-weight: bold; }
+    .modal-year { font-size: 11px; color: #8a6a4a; margin-top: 4px; }
+    .modal-body { padding: 16px; }
+    .info-block { margin-bottom: 14px; padding: 8px 12px; border-left: 2px solid #8b3a1a; }
+    .info-label { color: #8a6a4a; font-size: 10px; letter-spacing: 1px; margin-bottom: 6px; text-transform: uppercase; }
+    .info-value { color: #b8a87a; font-size: 12px; line-height: 1.5; }
+    .close-btn { background: #1a1a1f; border: none; border-top: 1px solid #3a2a1a; color: #c8b88a; padding: 12px; cursor: pointer; font-family: monospace; font-size: 12px; width: 100%; transition: 0.2s; }
+    .close-btn:hover { background: #8b3a1a; color: #0a0a0f; }
+    @media (max-width: 768px) { .info-value { font-size: 11px; } .modal-name { font-size: 16px; } .modal-body { padding: 12px; } .conclusion-title { font-size: 14px; } .conclusion-text { font-size: 11px; } }
   </style>
 </head>
 <body>
@@ -263,12 +48,8 @@
 
 <div id="loader" class="loader">
   <div class="pixel-loader"></div>
-  <div class="loader-text">ЗАГРУЗКА КАРТЫ...</div>
-</div>
-
-<div id="errorModal" style="display:none; position:fixed; inset:0; background:#0a0a0f; z-index:500; justify-content:center; align-items:center; flex-direction:column; gap:20px;">
-  <div style="color:#c8b88a; font-size:14px;">ОШИБКА: КАРТА НЕ ЗАГРУЗИЛАСЬ</div>
-  <button onclick="location.reload()" style="background:#1a1a1f; border:2px solid #8b3a1a; color:#c8b88a; padding:10px 20px; font-family:monospace;">ПЕРЕЗАГРУЗИТЬ</button>
+  <div class="loader-text">ЗАГРУЗКА КАРТЫ</div>
+  <div class="loader-progress" id="progressText">0%</div>
 </div>
 
 <div id="conclusionModal" class="conclusion-modal">
@@ -291,18 +72,9 @@
       <div class="modal-year" id="modalYear"></div>
     </div>
     <div class="modal-body">
-      <div class="info-block">
-        <div class="info-label">ДАТЫ ЖИЗНИ</div>
-        <div class="info-value" id="modalDates"></div>
-      </div>
-      <div class="info-block">
-        <div class="info-label">МЕСТО СМЕРТИ</div>
-        <div class="info-value" id="modalDeathPlace"></div>
-      </div>
-      <div class="info-block">
-        <div class="info-label">БИОГРАФИЯ</div>
-        <div class="info-value" id="modalBio"></div>
-      </div>
+      <div class="info-block"><div class="info-label">ДАТЫ ЖИЗНИ</div><div class="info-value" id="modalDates"></div></div>
+      <div class="info-block"><div class="info-label">МЕСТО СМЕРТИ</div><div class="info-value" id="modalDeathPlace"></div></div>
+      <div class="info-block"><div class="info-label">БИОГРАФИЯ</div><div class="info-value" id="modalBio"></div></div>
     </div>
     <button class="close-btn" onclick="closeModal()">ЗАКРЫТЬ</button>
   </div>
@@ -319,7 +91,6 @@
   let ORIGINAL_WIDTH = 1100;
   let ORIGINAL_HEIGHT = 750;
   let mapLoaded = false;
-  let loadTimeout;
   
   let zoom = 1.0;
   let panX = 0;
@@ -332,7 +103,14 @@
   let hoveredHero = null;
 
   const loader = document.getElementById('loader');
-  const errorModal = document.getElementById('errorModal');
+  const progressText = document.getElementById('progressText');
+
+  mapImage.onprogress = (e) => {
+    if (e.lengthComputable) {
+      let percent = Math.round((e.loaded / e.total) * 100);
+      progressText.innerText = percent + '%';
+    }
+  };
 
   const iconData = {
     warrior: [[0,0,0,1,1,1,1,0,0,1,1,1,1,0,0,0],[0,0,1,2,2,2,2,1,1,2,2,2,2,1,0,0],[0,1,2,2,2,2,2,2,2,2,2,2,2,2,1,0],[0,1,2,2,2,2,2,2,2,2,2,2,2,2,1,0],[0,1,2,2,2,2,2,2,2,2,2,2,2,2,1,0],[0,0,1,2,2,2,2,3,3,2,2,2,2,1,0,0],[0,0,0,1,1,1,3,3,3,3,1,1,1,0,0,0],[0,0,0,0,1,3,3,3,3,3,3,1,0,0,0,0],[0,0,0,0,1,3,3,3,3,3,3,1,0,0,0,0],[0,0,0,1,1,1,3,3,3,3,1,1,1,0,0,0],[0,0,1,2,1,1,3,3,3,3,1,1,2,1,0,0],[0,1,2,2,1,1,3,3,3,3,1,1,2,2,1,0],[0,1,2,2,1,1,0,0,0,0,1,1,2,2,1,0],[0,1,2,2,1,0,0,0,0,0,0,1,2,2,1,0],[0,0,1,1,0,0,0,0,0,0,0,0,1,1,0,0],[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]],
@@ -340,13 +118,68 @@
     commander: [[0,0,0,0,1,1,1,1,1,1,0,0,0,0,0,0],[0,0,0,1,2,2,2,2,2,2,1,0,0,0,0,0],[0,0,1,2,2,2,2,2,2,2,2,1,0,0,0,0],[0,0,1,2,2,2,2,2,2,2,2,1,0,0,0,0],[0,0,1,2,2,2,2,2,2,2,2,1,0,0,0,0],[0,0,0,1,2,2,3,3,2,2,1,0,0,0,0,0],[0,0,0,0,1,3,3,3,3,1,0,0,0,0,0,0],[0,0,0,1,1,3,3,3,3,1,1,0,0,0,0,0],[0,0,1,2,1,3,3,3,3,1,2,1,0,0,0,0],[0,0,1,2,1,1,1,1,1,1,2,1,0,0,0,0],[0,0,1,2,2,1,1,1,1,2,2,1,0,0,0,0],[0,0,0,1,2,2,1,1,2,2,1,0,0,0,0,0],[0,0,0,1,2,2,0,0,2,2,1,0,0,0,0,0],[0,0,0,0,1,1,0,0,1,1,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]]
   };
 
+  // ===== РАСШИРЕННЫЕ БИОГРАФИИ (ПОЛНЫЕ, С ЦИТАТАМИ) =====
   const heroes = [
-    { name: 'Анатоль Курагин', iconType: 'warrior', birthYear: '?', deathYear: '1812', deathPlace: 'После Бородинского сражения', x: 1004, y: 414, color: '#8a3a2a', bio: 'Сын князя Василия, брат Элен. Красавец, кутила, игрок. Попытался украсть Наташу Ростову, чем разрушил её помолвку с Андреем. Во время Бородинского сражения был тяжело ранен в ногу. Ему сделали ампутацию, но спасти не смогли. Умер от гангрены.' },
-    { name: 'Петя Ростов', iconType: 'warrior', birthYear: '1797', deathYear: '1812', deathPlace: 'Под Вязьмой', x: 965, y: 482, color: '#aa5544', bio: 'Младший сын графа Ростова. В 15 лет ушёл на войну. Погиб в партизанском бою. Толстой пишет: «Петя взмахнул руками, но что-то тяжело ударило его в голову». Его смерть стала тяжёлым ударом для семьи.' },
-    { name: 'Андрей Болконский', iconType: 'noble', birthYear: '1778', deathYear: '1812', deathPlace: 'Ярославль', x: 1220, y: 170, color: '#6688aa', bio: 'Князь, герой Аустерлица и Бородина. Полюбил Наташу, но отложил свадьбу. Наташа изменила ему с Анатолем. На Бородинском поле был смертельно ранен. Умер в Ярославле на руках у Наташи и Марьи, простив всех. Перед смертью сказал: «Надо жить, надо любить, надо верить».' },
-    { name: 'Элен Безухова', iconType: 'noble', birthYear: '1780-е', deathYear: '1812', deathPlace: 'Санкт-Петербург', x: 848, y: 127, color: '#b88a5a', bio: 'Дочь князя Василия, сестра Анатоля. Светская красавица, жена Пьера. Вела распутный образ жизни. Умерла внезапно при загадочных обстоятельствах. Толстой оставляет её смерть за кадром, показывая пустоту светской жизни.' },
-    { name: 'Михаил Кутузов', iconType: 'commander', birthYear: '1745', deathYear: '1813 (28 апр.)', deathPlace: 'Бунцлау, Силезия', x: 481, y: 551, color: '#8a7a4a', bio: 'Главнокомандующий русской армией. Сдал Москву, чтобы сохранить армию. Дождался отступления французов и нанёс им удар. Умер в апреле 1813 года в Бунцлау. Толстой пишет: «Пришла смерть, и она сказала ему, что пора».' },
-    { name: 'Наполеон', iconType: 'commander', birthYear: '1769', deathYear: '1821 (5 мая)', deathPlace: 'Остров Святой Елены', x: 68, y: 630, color: '#6a6a6a', bio: 'Император Франции. Вторгся в Россию с 600-тысячной армией, занял пустую Москву, позорно бежал. Умер в ссылке на острове Святой Елены. Толстой называет его «ничтожным орудием истории».' }
+    { 
+      name: 'Анатоль Курагин', 
+      iconType: 'warrior', 
+      birthYear: '?', 
+      deathYear: '1812', 
+      deathPlace: 'После Бородинского сражения', 
+      x: 1004, y: 414, 
+      color: '#8a3a2a', 
+      bio: 'Сын князя Василия, брат Элен. Красавец, кутила, картёжник. Жил одним днём, не думая о последствиях. Попытался украсть Наташу Ростову, чем разрушил её помолвку с Андреем Болконским. Во время Бородинского сражения был тяжело ранен в ногу. Ему сделали ампутацию, но спасти не смогли. Умер от гангрены. Толстой показывает его смерть как мучительную: на краю смерти Анатоль просит прощения и жалеет всех — даже тех, кого не любил при жизни.'
+    },
+    { 
+      name: 'Петя Ростов', 
+      iconType: 'warrior', 
+      birthYear: '1797', 
+      deathYear: '1812', 
+      deathPlace: 'Под Вязьмой', 
+      x: 965, y: 482, 
+      color: '#aa5544', 
+      bio: 'Младший сын графа Ростова, брат Наташи. В 15 лет ушёл на войну, полный романтических представлений о подвиге. Попал в партизанский отряд Денисова. Во время стычки с французами бросился вперёд на лошади и был убит. Толстой описывает его смерть как страшную и бессмысленную: «Петя взмахнул руками, но что-то тяжело ударило его в голову». Его гибель стала тяжёлым ударом для семьи, особенно для матери, которая сходила с ума от горя. Символ того, как война убивает молодость и надежды.'
+    },
+    { 
+      name: 'Андрей Болконский', 
+      iconType: 'noble', 
+      birthYear: '1778', 
+      deathYear: '1812', 
+      deathPlace: 'Ярославль', 
+      x: 1220, y: 170, 
+      color: '#6688aa', 
+      bio: 'Князь, один из главных героев романа. Участвовал в Аустерлицком сражении, где был ранен и понял ничтожность славы: «Небо над Аустерлицем» стало для него символом вечной истины. Полюбил Наташу Ростову, но отложил свадьбу на год по требованию отца. Наташа изменила ему с Анатолем Курагиным — это стало тяжёлым ударом. На Бородинском поле был смертельно ранен осколком гранаты. Перевезён в Ярославль, где умер на руках у Наташи и сестры Марьи. Перед смертью простил всех и познал истинную любовь. Его последние слова: «Надо жить, надо любить, надо верить».'
+    },
+    { 
+      name: 'Элен Безухова', 
+      iconType: 'noble', 
+      birthYear: '1780-е', 
+      deathYear: '1812', 
+      deathPlace: 'Санкт-Петербург', 
+      x: 848, y: 127, 
+      color: '#b88a5a', 
+      bio: 'Дочь князя Василия, сестра Анатоля. Светская красавица, одна из самых блестящих женщин Петербурга. Жена Пьера Безухова. Вела распутный образ жизни, изменяла мужу. После разрыва с Пьером пыталась выйти замуж за двух знатных женихов одновременно — за старика-вельможу и за иностранного принца. Умерла внезапно при загадочных обстоятельствах — вероятно, от последствий неудачного аборта или сердечного приступа. Толстой оставляет её смерть за кадром, показывая пустоту светской жизни. Труп Элен убирают на следующий день — никто даже не скорбел по-настоящему.'
+    },
+    { 
+      name: 'Михаил Кутузов', 
+      iconType: 'commander', 
+      birthYear: '1745', 
+      deathYear: '1813 (28 апреля)', 
+      deathPlace: 'Бунцлау, Силезия', 
+      x: 481, y: 551, 
+      color: '#8a7a4a', 
+      bio: 'Главнокомандующий русской армией. Старый, больной, но мудрый полководец. Понимал, что Наполеона нужно измотать отступлением. Принял тяжёлое решение сдать Москву, чтобы сохранить армию. Дождался, пока французы начнут отступление, и нанёс им удар. Умер в апреле 1813 года в прусском городке Бунцлау, когда война была уже выиграна. Толстой пишет: «Пришла смерть, и она сказала ему, что пора». Кутузов уходит из жизни сразу после выполнения своей миссии — как народный герой, сделавший всё, что мог.'
+    },
+    { 
+      name: 'Наполеон Бонапарт', 
+      iconType: 'commander', 
+      birthYear: '1769', 
+      deathYear: '1821 (5 мая)', 
+      deathPlace: 'Остров Святой Елены', 
+      x: 68, y: 630, 
+      color: '#6a6a6a', 
+      bio: 'Император Франции, гений полководческого искусства. В 1812 году вторгся в Россию с 600-тысячной армией, надеясь на быструю победу. Занял пустую Москву, прождал месяц капитуляции, не дождался. Позорно бежал, бросив свою армию в России. После поражения при Ватерлоо был сослан англичанами на остров Святой Елены, где умер от рака желудка в 1821 году. Толстой показывает его как историческую фигуру, не понимавшую истинного смысла происходящего — «ничтожное орудие истории», которое считало себя вершителем судеб. Перед смертью сказал: «Франция, армия, во главе армии — Жозефина...»'
+    }
   ];
 
   function toCanvasX(x) { return (x / ORIGINAL_WIDTH) * canvas.width * zoom + panX; }
@@ -361,12 +194,7 @@
     const sx = x - size/2;
     const sy = y - size/2;
     const cols = {0:null,1:color,2:'#d8c8a8',3:'#c8a86a'};
-    for (let i=0;i<16;i++) {
-      for (let j=0;j<16;j++) {
-        let v = icon[i][j];
-        if (v && cols[v]) { ctx.fillStyle = cols[v]; ctx.fillRect(sx + j*ps, sy + i*ps, ps, ps); }
-      }
-    }
+    for (let i=0;i<16;i++) for (let j=0;j<16;j++) { let v = icon[i][j]; if (v && cols[v]) { ctx.fillStyle = cols[v]; ctx.fillRect(sx + j*ps, sy + i*ps, ps, ps); } }
   }
 
   function drawHeroes() {
@@ -411,12 +239,10 @@
     } else if (e.touches.length === 1 && isPanning) {
       panX += e.touches[0].clientX - lastTouchX;
       panY += e.touches[0].clientY - lastTouchY;
-      let mp = canvas.width * (zoom-1)/2;
-      let mp2 = canvas.height * (zoom-1)/2;
+      let mp = canvas.width * (zoom-1)/2, mp2 = canvas.height * (zoom-1)/2;
       panX = Math.min(Math.max(panX, -mp), mp);
       panY = Math.min(Math.max(panY, -mp2), mp2);
-      lastTouchX = e.touches[0].clientX;
-      lastTouchY = e.touches[0].clientY;
+      lastTouchX = e.touches[0].clientX; lastTouchY = e.touches[0].clientY;
       drawMap();
     }
   });
@@ -462,25 +288,17 @@
   window.onclick = e => { if (e.target === document.getElementById('conclusionModal')) document.getElementById('conclusionModal').style.display = 'none'; };
 
   mapImage.onload = () => {
-    clearTimeout(loadTimeout);
     ORIGINAL_WIDTH = mapImage.width;
     ORIGINAL_HEIGHT = mapImage.height;
     mapLoaded = true;
     resizeCanvas();
-    loader.classList.add('hide');
-    setTimeout(() => { loader.style.display = 'none'; }, 500);
+    progressText.innerText = '100%';
+    setTimeout(() => { loader.classList.add('hide'); setTimeout(() => { loader.style.display = 'none'; }, 500); }, 300);
   };
   mapImage.onerror = () => {
-    clearTimeout(loadTimeout);
-    loader.classList.add('hide');
-    setTimeout(() => { loader.style.display = 'none'; errorModal.style.display = 'flex'; }, 500);
+    progressText.innerText = 'ОШИБКА';
+    setTimeout(() => { loader.classList.add('hide'); setTimeout(() => { loader.style.display = 'none'; }, 500); }, 500);
   };
-  loadTimeout = setTimeout(() => {
-    if (!mapLoaded) {
-      loader.classList.add('hide');
-      setTimeout(() => { loader.style.display = 'none'; errorModal.style.display = 'flex'; }, 500);
-    }
-  }, 5000);
   resizeCanvas();
 </script>
 </body>
