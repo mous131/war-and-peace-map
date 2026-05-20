@@ -6,70 +6,126 @@
   <title>Война и Мир — Судьба человека</title>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-    html, body { width: 100%; height: 100%; overflow: hidden; background: #0a0a0f; font-family: 'Courier New', monospace; touch-action: none; }
-    canvas { position: fixed; inset: 0; width: 100vw; height: 100vh; display: block; background: #0a0a0f; cursor: default; touch-action: none; }
-    .frame { position: fixed; inset: 8px; pointer-events: none; border: 2px solid #8b3a1a; z-index: 50; }
-    .quote { position: fixed; bottom: 10px; left: 0; right: 0; text-align: center; color: #8a7a5a; font-size: 8px; background: rgba(10, 10, 15, 0.85); padding: 5px; z-index: 100; letter-spacing: 1px; border-top: 1px solid #3a2a1a; border-bottom: 1px solid #3a2a1a; pointer-events: none; }
     
-    /* Подсказка для телефона */
-    .mobile-hint {
-      position: fixed;
-      bottom: 50px;
-      right: 10px;
-      background: rgba(0,0,0,0.6);
-      color: #8a7a5a;
-      font-size: 8px;
-      padding: 4px 8px;
-      border-radius: 4px;
-      z-index: 150;
-      pointer-events: none;
-      font-family: monospace;
+    body {
+      background: #0a0a0f;
+      font-family: 'Courier New', monospace;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
     }
     
-    .loader { position: fixed; inset: 0; background: #0a0a0f; display: flex; justify-content: center; align-items: center; z-index: 200; transition: opacity 0.5s ease; flex-direction: column; gap: 15px; }
-    .loader.hide { opacity: 0; pointer-events: none; }
+    .map-container {
+      flex: 1;
+      position: relative;
+      background: #0a0a0f;
+      overflow: hidden;
+    }
+    
+    canvas {
+      position: absolute;
+      display: block;
+      background: #0a0a0f;
+    }
+    
+    /* Управление (только для мобильных) */
+    .mobile-controls {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      z-index: 200;
+      display: none;
+      flex-direction: column;
+      gap: 8px;
+    }
+    
+    .zoom-controls { display: flex; gap: 8px; justify-content: flex-end; }
+    .move-controls {
+      display: grid;
+      grid-template-columns: repeat(3, 50px);
+      gap: 5px;
+      background: rgba(0,0,0,0.7);
+      padding: 8px;
+      border-radius: 8px;
+      backdrop-filter: blur(4px);
+    }
+    
+    .ctrl-btn {
+      background: #1a1a1f;
+      border: 2px solid #8b3a1a;
+      color: #c8b88a;
+      font-size: 20px;
+      font-weight: bold;
+      padding: 12px;
+      text-align: center;
+      cursor: pointer;
+      border-radius: 8px;
+      font-family: monospace;
+      transition: 0.05s;
+      touch-action: manipulation;
+    }
+    .ctrl-btn:active { background: #8b3a1a; color: #0a0a0f; transform: scale(0.95); }
+    .empty { background: transparent; border: none; pointer-events: none; }
+    
+    /* Общие элементы */
+    .frame { position: fixed; inset: 8px; pointer-events: none; border: 2px solid #8b3a1a; z-index: 50; }
+    .quote { position: fixed; bottom: 10px; left: 0; right: 0; text-align: center; color: #8a7a5a; font-size: 8px; background: rgba(10, 10, 15, 0.85); padding: 5px; z-index: 100; letter-spacing: 1px; border-top: 1px solid #3a2a1a; border-bottom: 1px solid #3a2a1a; pointer-events: none; }
+    .conclusion-btn { position: fixed; top: 16px; left: 16px; z-index: 150; background: #1a1a1f; border: 2px solid #8b3a1a; color: #c8b88a; padding: 8px 14px; font-family: monospace; font-size: 11px; font-weight: bold; cursor: pointer; border-radius: 6px; }
+    
+    .loader { position: fixed; inset: 0; background: #0a0a0f; display: flex; justify-content: center; align-items: center; z-index: 200; flex-direction: column; gap: 15px; }
+    .loader.hide { display: none; }
     .pixel-loader { width: 32px; height: 32px; background: #8b3a1a; animation: pulse 0.8s infinite; }
     @keyframes pulse { 0% { transform: scale(0.8); opacity: 0.5; } 50% { transform: scale(1.2); opacity: 1; } 100% { transform: scale(0.8); opacity: 0.5; } }
     .loader-text { color: #8a7a5a; font-size: 9px; letter-spacing: 2px; }
-    .loader-progress { color: #c8b88a; font-size: 11px; margin-top: 5px; }
-    
-    .conclusion-btn { position: fixed; top: 16px; left: 16px; z-index: 150; background: #1a1a1f; border: 2px solid #8b3a1a; color: #c8b88a; padding: 8px 14px; font-family: 'Courier New', monospace; font-size: 11px; font-weight: bold; cursor: pointer; transition: 0.2s; letter-spacing: 1px; backdrop-filter: blur(2px); }
-    .conclusion-btn:hover { background: #8b3a1a; color: #0a0a0f; border-color: #c8b88a; }
-    .conclusion-modal { display: none; position: fixed; inset: 0; background: rgba(10, 10, 15, 0.95); z-index: 300; justify-content: center; align-items: center; }
-    .conclusion-content { width: 90%; max-width: 550px; max-height: 80vh; background: #0f0f14; border: 2px solid #8b3a1a; padding: 20px; overflow-y: auto; }
-    .conclusion-title { color: #c8b88a; font-size: 16px; letter-spacing: 2px; margin-bottom: 15px; text-align: center; border-bottom: 1px solid #3a2a1a; padding-bottom: 8px; }
-    .conclusion-text { color: #b8a87a; font-size: 12px; line-height: 1.6; text-align: justify; }
-    .conclusion-text p { margin-bottom: 12px; }
-    .close-conclusion { background: #1a1a1f; border: 2px solid #8b3a1a; color: #c8b88a; padding: 8px 16px; margin-top: 20px; cursor: pointer; font-family: monospace; width: 100%; }
     
     .modal { display: none; position: fixed; inset: 0; background: rgba(10, 10, 15, 0.95); z-index: 999; justify-content: center; align-items: center; }
-    .modal-content { width: 90%; max-width: 500px; max-height: 85vh; background: #0f0f14; border: 2px solid #8b3a1a; padding: 0; overflow-y: auto; }
-    .modal-header { background: #1a1a1f; padding: 12px 16px; border-bottom: 1px solid #3a2a1a; text-align: center; position: sticky; top: 0; }
-    .modal-name { font-size: 18px; color: #c8b88a; letter-spacing: 2px; font-weight: bold; }
+    .modal-content { width: 90%; max-width: 500px; max-height: 85vh; background: #0f0f14; border: 2px solid #8b3a1a; overflow-y: auto; }
+    .modal-header { background: #1a1a1f; padding: 12px 16px; border-bottom: 1px solid #3a2a1a; text-align: center; }
+    .modal-name { font-size: 18px; color: #c8b88a; font-weight: bold; }
     .modal-year { font-size: 11px; color: #8a6a4a; margin-top: 4px; }
     .modal-body { padding: 16px; }
     .info-block { margin-bottom: 14px; padding: 8px 12px; border-left: 2px solid #8b3a1a; }
-    .info-label { color: #8a6a4a; font-size: 10px; letter-spacing: 1px; margin-bottom: 6px; text-transform: uppercase; }
+    .info-label { color: #8a6a4a; font-size: 10px; text-transform: uppercase; margin-bottom: 6px; }
     .info-value { color: #b8a87a; font-size: 12px; line-height: 1.5; }
-    .close-btn { background: #1a1a1f; border: none; border-top: 1px solid #3a2a1a; color: #c8b88a; padding: 12px; cursor: pointer; font-family: monospace; font-size: 12px; width: 100%; transition: 0.2s; }
-    .close-btn:hover { background: #8b3a1a; color: #0a0a0f; }
+    .close-btn { background: #1a1a1f; border-top: 1px solid #3a2a1a; color: #c8b88a; padding: 12px; cursor: pointer; width: 100%; }
     
-    @media (max-width: 768px) { .info-value { font-size: 11px; } .modal-name { font-size: 16px; } .modal-body { padding: 12px; } .conclusion-title { font-size: 14px; } .conclusion-text { font-size: 11px; } }
+    .conclusion-modal { display: none; position: fixed; inset: 0; background: rgba(10, 10, 15, 0.95); z-index: 300; justify-content: center; align-items: center; }
+    .conclusion-content { width: 90%; max-width: 550px; max-height: 80vh; background: #0f0f14; border: 2px solid #8b3a1a; padding: 20px; overflow-y: auto; }
+    .conclusion-title { color: #c8b88a; font-size: 16px; text-align: center; border-bottom: 1px solid #3a2a1a; padding-bottom: 8px; margin-bottom: 15px; }
+    .conclusion-text { color: #b8a87a; font-size: 12px; line-height: 1.6; text-align: justify; }
+    .close-conclusion { background: #1a1a1f; border: 2px solid #8b3a1a; color: #c8b88a; padding: 8px 16px; margin-top: 20px; cursor: pointer; width: 100%; }
   </style>
 </head>
 <body>
 
-<canvas id="mapCanvas"></canvas>
+<div class="map-container">
+  <canvas id="mapCanvas"></canvas>
+</div>
+
 <div class="frame"></div>
 <div class="quote">Надо жить, надо любить, надо верить... — Лев Толстой</div>
-<div class="mobile-hint">✋ ДВА ПАЛЬЦА — ЗУМ | ОДИН ПАЛЕЦ — ПЕРЕМЕЩЕНИЕ</div>
 
 <button class="conclusion-btn" id="conclusionBtn">ВЫВОД</button>
+
+<div class="mobile-controls" id="mobileControls">
+  <div class="zoom-controls">
+    <button class="ctrl-btn" id="zoomInBtn">+</button>
+    <button class="ctrl-btn" id="zoomOutBtn">-</button>
+  </div>
+  <div class="move-controls">
+    <button class="ctrl-btn empty"></button>
+    <button class="ctrl-btn" id="moveUpBtn">▲</button>
+    <button class="ctrl-btn empty"></button>
+    <button class="ctrl-btn" id="moveLeftBtn">◄</button>
+    <button class="ctrl-btn" id="moveDownBtn">▼</button>
+    <button class="ctrl-btn" id="moveRightBtn">►</button>
+  </div>
+</div>
 
 <div id="loader" class="loader">
   <div class="pixel-loader"></div>
   <div class="loader-text">ЗАГРУЗКА КАРТЫ</div>
-  <div class="loader-progress" id="progressText">0%</div>
 </div>
 
 <div id="conclusionModal" class="conclusion-modal">
@@ -115,195 +171,208 @@
   let zoom = 1.0;
   let panX = 0;
   let panY = 0;
-  let initialDistance = 0;
-  let initialZoom = 1;
-  let lastTouchX = 0;
-  let lastTouchY = 0;
-  let isPanning = false;
-  let isZooming = false;
-  let hoveredHero = null;
-
-  const loader = document.getElementById('loader');
-  const progressText = document.getElementById('progressText');
-
-  mapImage.onprogress = (e) => {
-    if (e.lengthComputable) {
-      let percent = Math.round((e.loaded / e.total) * 100);
-      progressText.innerText = percent + '%';
-    }
-  };
-
-  const iconData = {
-    warrior: [[0,0,0,1,1,1,1,0,0,1,1,1,1,0,0,0],[0,0,1,2,2,2,2,1,1,2,2,2,2,1,0,0],[0,1,2,2,2,2,2,2,2,2,2,2,2,2,1,0],[0,1,2,2,2,2,2,2,2,2,2,2,2,2,1,0],[0,1,2,2,2,2,2,2,2,2,2,2,2,2,1,0],[0,0,1,2,2,2,2,3,3,2,2,2,2,1,0,0],[0,0,0,1,1,1,3,3,3,3,1,1,1,0,0,0],[0,0,0,0,1,3,3,3,3,3,3,1,0,0,0,0],[0,0,0,0,1,3,3,3,3,3,3,1,0,0,0,0],[0,0,0,1,1,1,3,3,3,3,1,1,1,0,0,0],[0,0,1,2,1,1,3,3,3,3,1,1,2,1,0,0],[0,1,2,2,1,1,3,3,3,3,1,1,2,2,1,0],[0,1,2,2,1,1,0,0,0,0,1,1,2,2,1,0],[0,1,2,2,1,0,0,0,0,0,0,1,2,2,1,0],[0,0,1,1,0,0,0,0,0,0,0,0,1,1,0,0],[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]],
-    noble: [[0,0,0,0,1,1,1,1,1,1,0,0,0,0,0,0],[0,0,0,1,2,2,2,2,2,2,1,0,0,0,0,0],[0,0,1,2,2,2,2,2,2,2,2,1,0,0,0,0],[0,0,1,2,2,2,2,2,2,2,2,1,0,0,0,0],[0,0,1,2,2,2,2,2,2,2,2,1,0,0,0,0],[0,0,0,1,2,2,2,2,2,2,1,0,0,0,0,0],[0,0,0,0,1,1,1,1,1,1,0,0,0,0,0,0],[0,0,0,0,1,3,3,3,3,1,0,0,0,0,0,0],[0,0,0,0,1,3,3,3,3,1,0,0,0,0,0,0],[0,0,0,0,1,1,1,1,1,1,0,0,0,0,0,0],[0,0,0,1,2,1,1,1,1,2,1,0,0,0,0,0],[0,0,1,2,2,1,1,1,1,2,2,1,0,0,0,0],[0,0,1,2,2,1,0,0,1,2,2,1,0,0,0,0],[0,0,1,2,2,0,0,0,0,2,2,1,0,0,0,0],[0,0,0,1,1,0,0,0,0,1,1,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]],
-    commander: [[0,0,0,0,1,1,1,1,1,1,0,0,0,0,0,0],[0,0,0,1,2,2,2,2,2,2,1,0,0,0,0,0],[0,0,1,2,2,2,2,2,2,2,2,1,0,0,0,0],[0,0,1,2,2,2,2,2,2,2,2,1,0,0,0,0],[0,0,1,2,2,2,2,2,2,2,2,1,0,0,0,0],[0,0,0,1,2,2,3,3,2,2,1,0,0,0,0,0],[0,0,0,0,1,3,3,3,3,1,0,0,0,0,0,0],[0,0,0,1,1,3,3,3,3,1,1,0,0,0,0,0],[0,0,1,2,1,3,3,3,3,1,2,1,0,0,0,0],[0,0,1,2,1,1,1,1,1,1,2,1,0,0,0,0],[0,0,1,2,2,1,1,1,1,2,2,1,0,0,0,0],[0,0,0,1,2,2,1,1,2,2,1,0,0,0,0,0],[0,0,0,1,2,2,0,0,2,2,1,0,0,0,0,0],[0,0,0,0,1,1,0,0,1,1,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]]
-  };
+  
+  let containerWidth = 0;
+  let containerHeight = 0;
+  
+  // Определяем устройство
+  const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+  
+  // Показываем мобильные кнопки только на телефоне
+  if (isMobile) {
+    document.getElementById('mobileControls').style.display = 'flex';
+  }
 
   const heroes = [
-    { name: 'Анатоль Курагин', iconType: 'warrior', birthYear: '?', deathYear: '1812', deathPlace: 'После Бородинского сражения', x: 1004, y: 414, color: '#8a3a2a', bio: 'Сын князя Василия, брат Элен. Красавец, кутила, картёжник. Жил одним днём. Попытался украсть Наташу Ростову, чем разрушил её помолвку с Андреем. Во время Бородинского сражения был тяжело ранен в ногу. Ему сделали ампутацию, но спасти не смогли. Умер от гангрены. На краю смерти Анатоль просит прощения и жалеет всех.' },
-    { name: 'Петя Ростов', iconType: 'warrior', birthYear: '1797', deathYear: '1812', deathPlace: 'Под Вязьмой', x: 965, y: 482, color: '#aa5544', bio: 'Младший сын графа Ростова, брат Наташи. В 15 лет ушёл на войну, полный романтических представлений о подвиге. Попал в партизанский отряд Денисова. Во время стычки с французами бросился вперёд на лошади и был убит. Толстой пишет: «Петя взмахнул руками, но что-то тяжело ударило его в голову». Символ того, как война убивает молодость и надежды.' },
-    { name: 'Андрей Болконский', iconType: 'noble', birthYear: '1778', deathYear: '1812', deathPlace: 'Ярославль', x: 1250, y: 240, color: '#6688aa', bio: 'Князь, герой Аустерлица и Бородина. Понял ничтожность славы: «Небо над Аустерлицем» стало символом истины. Полюбил Наташу, но отложил свадьбу. Наташа изменила ему с Анатолем. На Бородинском поле смертельно ранен. Умер в Ярославле на руках у Наташи и Марьи, простив всех. Перед смертью: «Надо жить, надо любить, надо верить».' },
-    { name: 'Элен Безухова', iconType: 'noble', birthYear: '1780-е', deathYear: '1812', deathPlace: 'Санкт-Петербург', x: 848, y: 127, color: '#b88a5a', bio: 'Дочь князя Василия, сестра Анатоля. Светская красавица, жена Пьера. Вела распутный образ жизни. После разрыва с Пьером пыталась выйти замуж за двоих одновременно. Умерла внезапно при загадочных обстоятельствах. Труп убирают на следующий день — никто не скорбел. Символ пустоты светской жизни.' },
-    { name: 'Михаил Кутузов', iconType: 'commander', birthYear: '1745', deathYear: '1813 (28 апр.)', deathPlace: 'Бунцлау, Силезия', x: 481, y: 551, color: '#8a7a4a', bio: 'Главнокомандующий русской армией. Старый, больной, но мудрый. Сдал Москву, чтобы сохранить армию. Дождался отступления французов и нанёс удар. Умер в апреле 1813 года, когда война была уже выиграна. Толстой: «Пришла смерть, и она сказала ему, что пора». Народный герой.' },
-    { name: 'Наполеон', iconType: 'commander', birthYear: '1769', deathYear: '1821 (5 мая)', deathPlace: 'Остров Святой Елены', x: 68, y: 630, color: '#6a6a6a', bio: 'Император Франции. Вторгся в Россию с 600-тысячной армией, занял пустую Москву, позорно бежал. Умер в ссылке. Толстой называет его «ничтожным орудием истории». Перед смертью: «Франция, армия, во главе армии — Жозефина...»' }
+    { name: 'Анатоль Курагин', birthYear: '?', deathYear: '1812', deathPlace: 'После Бородинского сражения', x: 1004, y: 414, color: '#8a3a2a', bio: 'Сын князя Василия, брат Элен. Красавец, кутила. Попытался украсть Наташу Ростову. Был тяжело ранен под Бородином, умер от гангрены.' },
+    { name: 'Петя Ростов', birthYear: '1797', deathYear: '1812', deathPlace: 'Под Вязьмой', x: 965, y: 482, color: '#aa5544', bio: 'Младший сын графа Ростова. В 15 лет ушёл на войну. Погиб в партизанском бою. «Петя взмахнул руками, но что-то тяжело ударило его в голову».' },
+    { name: 'Андрей Болконский', birthYear: '1778', deathYear: '1812', deathPlace: 'Ярославль', x: 1280, y: 200, color: '#6688aa', bio: 'Князь, герой Аустерлица и Бородина. Понял ничтожность славы. Полюбил Наташу. Смертельно ранен на Бородинском поле. Умер в Ярославле на руках у Наташи. Перед смертью: «Надо жить, надо любить, надо верить».' },
+    { name: 'Элен Безухова', birthYear: '1780-е', deathYear: '1812', deathPlace: 'Санкт-Петербург', x: 848, y: 127, color: '#b88a5a', bio: 'Светская красавица, жена Пьера. Умерла внезапно при загадочных обстоятельствах. Символ пустоты светской жизни.' },
+    { name: 'Михаил Кутузов', birthYear: '1745', deathYear: '1813 (28 апр.)', deathPlace: 'Бунцлау, Силезия', x: 481, y: 551, color: '#8a7a4a', bio: 'Главнокомандующий. Сдал Москву, чтобы сохранить армию. Умер после победы. Толстой: «Пришла смерть, и она сказала ему, что пора».' },
+    { name: 'Наполеон', birthYear: '1769', deathYear: '1821 (5 мая)', deathPlace: 'Остров Святой Елены', x: 68, y: 630, color: '#6a6a6a', bio: 'Император Франции. Вторгся в Россию, занял пустую Москву, бежал. Умер в ссылке. «Ничтожное орудие истории».' }
   ];
 
-  function toCanvasX(x) { return (x / ORIGINAL_WIDTH) * canvas.width * zoom + panX; }
-  function toCanvasY(y) { return (y / ORIGINAL_HEIGHT) * canvas.height * zoom + panY; }
+  function resizeCanvas() {
+    const container = canvas.parentElement;
+    containerWidth = container.clientWidth;
+    containerHeight = container.clientHeight;
+    canvas.width = containerWidth;
+    canvas.height = containerHeight;
+    drawMap();
+  }
+
+  function toCanvasX(x) { return ((x / ORIGINAL_WIDTH) * canvas.width) * zoom + panX; }
+  function toCanvasY(y) { return ((y / ORIGINAL_HEIGHT) * canvas.height) * zoom + panY; }
   function toOriginalX(cx) { return ((cx - panX) / zoom) / canvas.width * ORIGINAL_WIDTH; }
   function toOriginalY(cy) { return ((cy - panY) / zoom) / canvas.height * ORIGINAL_HEIGHT; }
 
-  function drawPixelIcon(x, y, size, type, color) {
-    const icon = iconData[type];
-    if (!icon) return;
-    const ps = size / 16;
-    const sx = x - size/2;
-    const sy = y - size/2;
-    const cols = {0:null,1:color,2:'#d8c8a8',3:'#c8a86a'};
-    for (let i=0;i<16;i++) for (let j=0;j<16;j++) { let v = icon[i][j]; if (v && cols[v]) { ctx.fillStyle = cols[v]; ctx.fillRect(sx + j*ps, sy + i*ps, ps, ps); } }
+  // Рисуем иконки (ПК версия — пиксельные)
+  function drawPcIcon(x, y, size, color) {
+    ctx.fillStyle = color;
+    ctx.fillRect(x - size/2, y - size/2, size, size);
+    ctx.fillStyle = '#ffddaa';
+    ctx.fillRect(x - size/4, y - size/4, size/2, size/2);
+    ctx.fillStyle = '#ff0000';
+    ctx.fillRect(x - size/4, y - 2, size/2, 4);
+    ctx.fillRect(x - 2, y - size/4, 4, size/2);
+  }
+  
+  // Рисуем большие точки (мобильная версия)
+  function drawMobileIcon(x, y, size, color) {
+    ctx.fillStyle = color;
+    ctx.beginPath();
+    ctx.arc(x, y, size/1.5, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = '#ffddaa';
+    ctx.beginPath();
+    ctx.arc(x, y, size/3, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = '#ff0000';
+    ctx.fillRect(x - size/5, y - 3, size/2.5, 6);
+    ctx.fillRect(x - 3, y - size/5, 6, size/2.5);
   }
 
   function drawHeroes() {
-    heroes.forEach(h => {
-      const x = toCanvasX(h.x), y = toCanvasY(h.y);
-      let sz = Math.max(22, Math.min(48, 34 * zoom));
-      let hover = (hoveredHero === h);
-      if (hover) { sz *= 1.1; ctx.shadowBlur = 10; ctx.shadowColor = '#8b3a1a'; }
-      else { ctx.shadowBlur = 3; ctx.shadowColor = '#000'; }
-      drawPixelIcon(x, y, sz, h.iconType, h.color);
+    heroes.forEach(hero => {
+      const x = toCanvasX(hero.x);
+      const y = toCanvasY(hero.y);
+      let size = isMobile ? Math.max(35, 45 * zoom) : Math.max(22, 30 * zoom);
+      
+      if (x + size < 0 || x - size > canvas.width || y + size < 0 || y - size > canvas.height) return;
+      
+      ctx.shadowBlur = 5;
+      ctx.shadowColor = '#000';
+      
+      if (isMobile) {
+        drawMobileIcon(x, y, size, hero.color);
+      } else {
+        drawPcIcon(x, y, size, hero.color);
+      }
+      
       ctx.shadowBlur = 0;
-      let fs = Math.max(9, Math.min(16, 12 * zoom));
-      ctx.font = `bold ${fs}px 'Courier New', monospace`;
-      ctx.fillStyle = '#000'; ctx.fillText(h.name, x + sz/2 + 5, y - 5);
-      ctx.fillStyle = '#c8b88a'; ctx.fillText(h.name, x + sz/2 + 4, y - 6);
+      
+      let fontSize = isMobile ? Math.max(12, 14 * zoom) : Math.max(10, 12 * zoom);
+      ctx.font = `bold ${fontSize}px 'Courier New', monospace`;
+      ctx.fillStyle = '#000000';
+      ctx.fillText(hero.name, x + size/2 + 5, y - 5);
+      ctx.fillStyle = '#c8b88a';
+      ctx.fillText(hero.name, x + size/2 + 4, y - 6);
     });
   }
 
   function drawMap() {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
     if (!mapLoaded || !mapImage.complete) {
-      ctx.fillStyle = '#0a0a0f'; ctx.fillRect(0, 0, canvas.width, canvas.height);
+      ctx.fillStyle = '#0a0a0f';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
       return;
     }
-    ctx.drawImage(mapImage, panX, panY, canvas.width * zoom, canvas.height * zoom);
+    const imgW = canvas.width * zoom;
+    const imgH = canvas.height * zoom;
+    ctx.drawImage(mapImage, panX, panY, imgW, imgH);
     drawHeroes();
   }
 
-  function getDistance(t) { return Math.hypot(t[0].clientX - t[1].clientX, t[0].clientY - t[1].clientY); }
-  
-  // Обработка касаний с защитой от конфликта
-  canvas.addEventListener('touchstart', e => {
-    e.preventDefault();
-    if (e.touches.length === 2) {
-      isZooming = true;
-      isPanning = false;
-      initialDistance = getDistance(e.touches);
-      initialZoom = zoom;
-    } else if (e.touches.length === 1 && !isZooming) {
-      isPanning = true;
-      lastTouchX = e.touches[0].clientX;
-      lastTouchY = e.touches[0].clientY;
-    }
-  });
-  
-  canvas.addEventListener('touchmove', e => {
-    e.preventDefault();
-    if (e.touches.length === 2 && initialDistance > 0) {
-      let newZoom = initialZoom * (getDistance(e.touches) / initialDistance);
-      zoom = Math.min(Math.max(0.8, newZoom), 3);
-      drawMap();
-    } else if (e.touches.length === 1 && isPanning && !isZooming) {
-      panX += e.touches[0].clientX - lastTouchX;
-      panY += e.touches[0].clientY - lastTouchY;
-      let mp = canvas.width * (zoom-1)/2, mp2 = canvas.height * (zoom-1)/2;
-      panX = Math.min(Math.max(panX, -mp), mp);
-      panY = Math.min(Math.max(panY, -mp2), mp2);
-      lastTouchX = e.touches[0].clientX;
-      lastTouchY = e.touches[0].clientY;
-      drawMap();
-    }
-  });
-  
-  canvas.addEventListener('touchend', e => {
-    if (e.touches.length < 2) { isZooming = false; initialDistance = 0; }
-    if (e.touches.length === 0) { isPanning = false; isZooming = false; }
-  });
-
-  // Обработка кликов (увеличенная зона 50px)
-  function checkHeroTap(clientX, clientY) {
-    const r = canvas.getBoundingClientRect();
-    const tapX = (clientX - r.left) * (canvas.width / r.width);
-    const tapY = (clientY - r.top) * (canvas.height / r.height);
-    const origX = toOriginalX(tapX);
-    const origY = toOriginalY(tapY);
+  // Мобильные кнопки
+  if (isMobile) {
+    document.getElementById('zoomInBtn').onclick = () => { zoom = Math.min(zoom + 0.15, 2.5); drawMap(); };
+    document.getElementById('zoomOutBtn').onclick = () => { zoom = Math.max(zoom - 0.15, 0.6); drawMap(); };
+    const MOVE_STEP = 40;
+    document.getElementById('moveUpBtn').onclick = () => { panY += MOVE_STEP; drawMap(); };
+    document.getElementById('moveDownBtn').onclick = () => { panY -= MOVE_STEP; drawMap(); };
+    document.getElementById('moveLeftBtn').onclick = () => { panX += MOVE_STEP; drawMap(); };
+    document.getElementById('moveRightBtn').onclick = () => { panX -= MOVE_STEP; drawMap(); };
+  } else {
+    // ПК: зум колесом мыши + панорамирование мышью
+    let isDragging = false;
+    let lastX = 0, lastY = 0;
     
-    for (let h of heroes) {
-      const dx = Math.abs(origX - h.x);
-      const dy = Math.abs(origY - h.y);
-      if (dx < 50 && dy < 50) {
-        openModal(h);
+    canvas.addEventListener('wheel', (e) => {
+      e.preventDefault();
+      const delta = e.deltaY > 0 ? -0.1 : 0.1;
+      zoom = Math.min(Math.max(zoom + delta, 0.6), 2.5);
+      drawMap();
+    });
+    
+    canvas.addEventListener('mousedown', (e) => {
+      isDragging = true;
+      lastX = e.clientX;
+      lastY = e.clientY;
+      canvas.style.cursor = 'grabbing';
+    });
+    
+    window.addEventListener('mousemove', (e) => {
+      if (!isDragging) return;
+      const dx = e.clientX - lastX;
+      const dy = e.clientY - lastY;
+      panX += dx;
+      panY += dy;
+      lastX = e.clientX;
+      lastY = e.clientY;
+      drawMap();
+    });
+    
+    window.addEventListener('mouseup', () => {
+      isDragging = false;
+      canvas.style.cursor = 'default';
+    });
+  }
+
+  // Клик по герою (универсальный)
+  function checkHit(clientX, clientY) {
+    const rect = canvas.getBoundingClientRect();
+    const clickX = (clientX - rect.left) * (canvas.width / rect.width);
+    const clickY = (clientY - rect.top) * (canvas.height / rect.height);
+    const origX = toOriginalX(clickX);
+    const origY = toOriginalY(clickY);
+    const hitDist = isMobile ? 70 : 40;
+    
+    for (let hero of heroes) {
+      const dx = Math.abs(origX - hero.x);
+      const dy = Math.abs(origY - hero.y);
+      if (dx < hitDist && dy < hitDist) {
+        openModal(hero);
         return true;
       }
     }
     return false;
   }
 
-  canvas.addEventListener('click', e => {
-    checkHeroTap(e.clientX, e.clientY);
-  });
-  
-  canvas.addEventListener('touchstart', e => {
-    if (e.touches.length === 1 && !isPanning && !isZooming) {
-      // Небольшая задержка, чтобы отличить от панорамирования
-      setTimeout(() => {
-        if (!isPanning && !isZooming) {
-          checkHeroTap(e.touches[0].clientX, e.touches[0].clientY);
-        }
-      }, 50);
+  canvas.addEventListener('click', (e) => { checkHit(e.clientX, e.clientY); });
+  canvas.addEventListener('touchstart', (e) => {
+    e.preventDefault();
+    if (e.touches.length === 1) {
+      checkHit(e.touches[0].clientX, e.touches[0].clientY);
     }
   });
-  
-  canvas.addEventListener('mousemove', e => {
-    const r = canvas.getBoundingClientRect();
-    const mx = (e.clientX - r.left) * (canvas.width / r.width);
-    const my = (e.clientY - r.top) * (canvas.height / r.height);
-    const ox = toOriginalX(mx), oy = toOriginalY(my);
-    let nh = null;
-    heroes.forEach(h => { if (Math.abs(ox - h.x) < 50 && Math.abs(oy - h.y) < 50) nh = h; });
-    hoveredHero = nh;
-    canvas.style.cursor = nh ? 'pointer' : 'default';
-    drawMap();
-  });
 
-  function openModal(h) {
-    document.getElementById('modalName').innerText = h.name;
-    document.getElementById('modalYear').innerText = h.deathYear || '';
-    document.getElementById('modalDates').innerText = `${h.birthYear} — ${h.deathYear || ''}`;
-    document.getElementById('modalDeathPlace').innerText = h.deathPlace;
-    document.getElementById('modalBio').innerText = h.bio;
+  function openModal(hero) {
+    document.getElementById('modalName').innerText = hero.name;
+    document.getElementById('modalYear').innerText = hero.deathYear || '';
+    document.getElementById('modalDates').innerText = `${hero.birthYear} — ${hero.deathYear || ''}`;
+    document.getElementById('modalDeathPlace').innerText = hero.deathPlace;
+    document.getElementById('modalBio').innerText = hero.bio;
     document.getElementById('modal').style.display = 'flex';
   }
+  
   function closeModal() { document.getElementById('modal').style.display = 'none'; }
-
-  function resizeCanvas() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; drawMap(); }
-  window.addEventListener('resize', resizeCanvas);
 
   document.getElementById('conclusionBtn').onclick = () => document.getElementById('conclusionModal').style.display = 'flex';
   document.getElementById('closeConclusionBtn').onclick = () => document.getElementById('conclusionModal').style.display = 'none';
-  window.onclick = e => { if (e.target === document.getElementById('conclusionModal')) document.getElementById('conclusionModal').style.display = 'none'; };
+  window.onclick = (e) => { if (e.target === document.getElementById('conclusionModal')) document.getElementById('conclusionModal').style.display = 'none'; };
 
+  window.addEventListener('resize', resizeCanvas);
+  
   mapImage.onload = () => {
     ORIGINAL_WIDTH = mapImage.width;
     ORIGINAL_HEIGHT = mapImage.height;
     mapLoaded = true;
     resizeCanvas();
-    progressText.innerText = '100%';
-    setTimeout(() => { loader.classList.add('hide'); setTimeout(() => { loader.style.display = 'none'; }, 500); }, 300);
+    document.getElementById('loader').classList.add('hide');
   };
   mapImage.onerror = () => {
-    progressText.innerText = 'ОШИБКА';
-    setTimeout(() => { loader.classList.add('hide'); setTimeout(() => { loader.style.display = 'none'; }, 500); }, 500);
+    document.getElementById('loader').classList.add('hide');
   };
+  
   resizeCanvas();
 </script>
 </body>
