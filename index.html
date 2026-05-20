@@ -29,7 +29,6 @@
       cursor: default;
     }
 
-    /* Красочная рамка */
     .frame {
       position: fixed;
       inset: 10px;
@@ -40,7 +39,6 @@
       border-radius: 4px;
     }
 
-    /* Цитата внизу */
     .quote {
       position: fixed;
       bottom: 15px;
@@ -57,7 +55,6 @@
       border-bottom: 1px solid #ff6600;
     }
 
-    /* ===== МОДАЛЬНОЕ ОКНО (КРАСОЧНОЕ) ===== */
     .modal {
       display: none;
       position: fixed;
@@ -204,10 +201,8 @@
   let mouseX = 0;
   let mouseY = 0;
 
-  // ===== ПИКСЕЛЬНЫЕ ИКОНКИ (16x16) ДЛЯ КАЖДОГО ГЕРОЯ =====
-  // Каждая иконка — массив из 16x16 пикселей (код: 1=тело, 2=акцент, 3=оружие)
   const iconData = {
-    warrior: [  // мечник (Анатоль, Петя)
+    warrior: [
       [0,0,0,1,1,1,1,0,0,1,1,1,1,0,0,0],
       [0,0,1,2,2,2,2,1,1,2,2,2,2,1,0,0],
       [0,1,2,2,2,2,2,2,2,2,2,2,2,2,1,0],
@@ -225,7 +220,7 @@
       [0,0,1,1,0,0,0,0,0,0,0,0,1,1,0,0],
       [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
     ],
-    noble: [  // дворянин (Князь, Элен)
+    noble: [
       [0,0,0,0,1,1,1,1,1,1,0,0,0,0,0,0],
       [0,0,0,1,2,2,2,2,2,2,1,0,0,0,0,0],
       [0,0,1,2,2,2,2,2,2,2,2,1,0,0,0,0],
@@ -243,7 +238,7 @@
       [0,0,0,1,1,0,0,0,0,1,1,0,0,0,0,0],
       [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
     ],
-    commander: [  // полководец (Кутузов, Наполеон)
+    commander: [
       [0,0,0,0,1,1,1,1,1,1,0,0,0,0,0,0],
       [0,0,0,1,2,2,2,2,2,2,1,0,0,0,0,0],
       [0,0,1,2,2,2,2,2,2,2,2,1,0,0,0,0],
@@ -275,18 +270,10 @@
   function drawPixelIcon(x, y, size, iconType, heroColor) {
     const icon = iconData[iconType];
     if (!icon) return;
-    
     const pixelSize = size / 16;
     const startX = x - size / 2;
     const startY = y - size / 2;
-    
-    const colors = {
-      0: null,
-      1: heroColor,
-      2: '#ffd39a',
-      3: '#ffd700'
-    };
-    
+    const colors = { 0: null, 1: heroColor, 2: '#ffd39a', 3: '#ffd700' };
     for (let row = 0; row < 16; row++) {
       for (let col = 0; col < 16; col++) {
         const val = icon[row][col];
@@ -328,11 +315,11 @@
     heroes.forEach(hero => {
       const x = toCanvasX(hero.x);
       const y = toCanvasY(hero.y);
-      let iconSize = Math.max(24, drawWidth / ORIGINAL_WIDTH * 32);
+      let iconSize = Math.max(28, drawWidth / ORIGINAL_WIDTH * 36);
       let isHovered = (hoveredHero === hero);
       
       if (isHovered) {
-        iconSize = iconSize * 1.15;
+        iconSize = iconSize * 1.1;
         ctx.shadowBlur = 15;
         ctx.shadowColor = '#ffaa44';
       } else {
@@ -343,9 +330,12 @@
       drawPixelIcon(x, y, iconSize, hero.iconType, hero.color);
       ctx.shadowBlur = 0;
       
-      let fontSize = Math.max(10, iconSize / 3);
-      ctx.font = `${fontSize}px 'Courier New', monospace`;
-      ctx.fillStyle = '#000';
+      // Увеличенный шрифт для имён (с 1/3 до 2/5 от размера иконки)
+      let fontSize = Math.max(12, iconSize / 2.2);
+      ctx.font = `bold ${fontSize}px 'Courier New', monospace`;
+      
+      // Тень для читаемости
+      ctx.fillStyle = '#000000';
       ctx.fillText(hero.name, x + iconSize/2 + 5, y - 5);
       ctx.fillStyle = '#ffddaa';
       ctx.fillText(hero.name, x + iconSize/2 + 4, y - 6);
@@ -357,7 +347,7 @@
     heroes.forEach(hero => {
       const x = toCanvasX(hero.x);
       const y = toCanvasY(hero.y);
-      const size = Math.max(24, drawWidth / ORIGINAL_WIDTH * 32);
+      const size = Math.max(28, drawWidth / ORIGINAL_WIDTH * 36);
       if (mouseX >= x - size/2 && mouseX <= x + size/2 && mouseY >= y - size/2 && mouseY <= y + size/2) over = true;
     });
     canvas.style.cursor = over ? 'pointer' : 'default';
@@ -371,7 +361,7 @@
     heroes.forEach(hero => {
       const x = toCanvasX(hero.x);
       const y = toCanvasY(hero.y);
-      const size = Math.max(24, drawWidth / ORIGINAL_WIDTH * 32);
+      const size = Math.max(28, drawWidth / ORIGINAL_WIDTH * 36);
       if (mouseX >= x - size/2 && mouseX <= x + size/2 && mouseY >= y - size/2 && mouseY <= y + size/2) newHovered = hero;
     });
     hoveredHero = newHovered;
@@ -385,7 +375,7 @@
     heroes.forEach(hero => {
       const x = toCanvasX(hero.x);
       const y = toCanvasY(hero.y);
-      const size = Math.max(24, drawWidth / ORIGINAL_WIDTH * 32);
+      const size = Math.max(28, drawWidth / ORIGINAL_WIDTH * 36);
       if (mx >= x - size/2 && mx <= x + size/2 && my >= y - size/2 && my <= y + size/2) openModal(hero);
     });
   });
@@ -393,7 +383,14 @@
   function openModal(hero) {
     document.getElementById('modalName').textContent = hero.name;
     document.getElementById('modalYear').textContent = hero.deathYear ? `† ${hero.deathYear}` : '';
-    document.getElementById('modalStatus').textContent = hero.deathYear ? 'ПОГИБ / УМЕР' : 'ВЫЖИЛ';
+    // Добавляем "погибла/умерла" для Элен
+    let statusText = '';
+    if (hero.name === 'Элен Безухова') {
+      statusText = 'ПОГИБЛА / УМЕРЛА';
+    } else {
+      statusText = hero.deathYear ? 'ПОГИБ / УМЕР' : 'ВЫЖИЛ';
+    }
+    document.getElementById('modalStatus').textContent = statusText;
     document.getElementById('modalDates').textContent = `${hero.birthYear} — ${hero.deathYear || '...'}`;
     document.getElementById('modalDeathPlace').textContent = hero.deathPlace || '—';
     document.getElementById('modalBio').textContent = hero.bio;
