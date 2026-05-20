@@ -15,7 +15,7 @@
       width: 100%;
       height: 100%;
       overflow: hidden;
-      background: #000;
+      background: #0a0a1a;
       font-family: 'Courier New', monospace;
     }
 
@@ -25,17 +25,19 @@
       width: 100vw;
       height: 100vh;
       display: block;
-      background: #000;
+      background: #0a0a1a;
       cursor: default;
     }
 
-    /* Пиксельная рамка */
-    canvas::after {
-      content: '';
+    /* Красочная рамка */
+    .frame {
       position: fixed;
       inset: 10px;
       pointer-events: none;
-      border: 3px solid #d4a73c;
+      border: 3px solid #ff6600;
+      box-shadow: 0 0 10px #ff6600, inset 0 0 10px #ff660033;
+      z-index: 50;
+      border-radius: 4px;
     }
 
     /* Цитата внизу */
@@ -45,119 +47,113 @@
       left: 0;
       right: 0;
       text-align: center;
-      color: #8a7a5a;
+      color: #ffaa44;
       font-size: 9px;
-      font-family: monospace;
-      background: rgba(0,0,0,0.6);
+      background: rgba(10, 10, 26, 0.8);
       padding: 5px;
       z-index: 100;
       letter-spacing: 1px;
+      border-top: 1px solid #ff6600;
+      border-bottom: 1px solid #ff6600;
     }
 
-    /* ===== МОДАЛЬНОЕ ОКНО (НОВЫЙ ДИЗАЙН) ===== */
+    /* ===== МОДАЛЬНОЕ ОКНО (КРАСОЧНОЕ) ===== */
     .modal {
       display: none;
       position: fixed;
       inset: 0;
-      background: rgba(0, 0, 0, 0.9);
+      background: rgba(0, 0, 0, 0.85);
       z-index: 999;
       justify-content: center;
       align-items: center;
-      backdrop-filter: blur(2px);
+      backdrop-filter: blur(3px);
     }
 
     .modal-content {
-      width: 480px;
+      width: 500px;
       max-width: 85%;
-      background: #0d0a05;
-      border-left: 6px solid #8b2a1a;
-      border-right: 1px solid #2a2a20;
-      border-top: 1px solid #2a2a20;
-      border-bottom: 1px solid #2a2a20;
-      box-shadow: 0 0 30px rgba(0,0,0,0.8);
+      background: linear-gradient(135deg, #1a1a2e, #0f0f1a);
+      border: 3px solid #ffaa44;
+      box-shadow: 0 0 30px rgba(255, 170, 68, 0.4);
       padding: 0;
       animation: slideUp 0.2s ease;
     }
 
     @keyframes slideUp {
-      from {
-        opacity: 0;
-        transform: translateY(20px);
-      }
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
     }
 
     .modal-header {
-      background: #0a0804;
-      padding: 18px 20px;
-      border-bottom: 1px solid #2a2a20;
+      background: linear-gradient(90deg, #2a1a0a, #1a0f05);
+      padding: 15px 20px;
+      border-bottom: 2px solid #ffaa44;
+      text-align: center;
     }
 
     .modal-name {
       font-size: 20px;
-      color: #c99a2e;
+      color: #ffcc66;
       letter-spacing: 2px;
       font-weight: bold;
+      text-shadow: 2px 2px 0 #663300;
     }
 
     .modal-year {
       font-size: 11px;
-      color: #6a5a3a;
-      margin-top: 6px;
+      color: #ff8866;
+      margin-top: 5px;
     }
 
     .modal-body {
       padding: 20px;
     }
 
-    .info-line {
-      margin-bottom: 18px;
-      border-bottom: 1px dashed #1f1f18;
-      padding-bottom: 12px;
+    .info-block {
+      background: rgba(0, 0, 0, 0.4);
+      margin-bottom: 12px;
+      padding: 10px 12px;
+      border-left: 4px solid #ffaa44;
     }
 
     .info-label {
-      color: #8b2a1a;
+      color: #ffaa66;
       font-size: 10px;
       letter-spacing: 1px;
-      margin-bottom: 6px;
+      margin-bottom: 5px;
       text-transform: uppercase;
     }
 
     .info-value {
-      color: #d8c89a;
+      color: #eeddbb;
       font-size: 13px;
       line-height: 1.5;
     }
 
     .close-btn {
-      background: #0a0804;
+      background: #2a1a0a;
       border: none;
-      border-top: 1px solid #2a2a20;
-      color: #8b2a1a;
-      padding: 12px 20px;
+      border-top: 2px solid #ffaa44;
+      color: #ffaa44;
+      padding: 12px;
       cursor: pointer;
       font-family: monospace;
       font-size: 12px;
       width: 100%;
       transition: 0.2s;
       font-weight: bold;
-      letter-spacing: 2px;
     }
 
     .close-btn:hover {
-      background: #1f1a10;
-      color: #c99a2e;
+      background: #ffaa44;
+      color: #0a0a1a;
     }
   </style>
 </head>
 <body>
 
 <canvas id="mapCanvas"></canvas>
-
+<div class="frame"></div>
 <div class="quote">«Надо жить, надо любить, надо верить...» — Лев Толстой</div>
 
 <div id="modal" class="modal">
@@ -167,19 +163,19 @@
       <div class="modal-year" id="modalYear"></div>
     </div>
     <div class="modal-body">
-      <div class="info-line">
+      <div class="info-block">
         <div class="info-label">⚔ СТАТУС</div>
         <div class="info-value" id="modalStatus"></div>
       </div>
-      <div class="info-line">
+      <div class="info-block">
         <div class="info-label">📅 ДАТЫ</div>
         <div class="info-value" id="modalDates"></div>
       </div>
-      <div class="info-line">
+      <div class="info-block">
         <div class="info-label">📍 МЕСТО</div>
         <div class="info-value" id="modalDeathPlace"></div>
       </div>
-      <div class="info-line">
+      <div class="info-block">
         <div class="info-label">📖 БИОГРАФИЯ</div>
         <div class="info-value" id="modalBio"></div>
       </div>
@@ -208,79 +204,113 @@
   let mouseX = 0;
   let mouseY = 0;
 
+  // ===== ПИКСЕЛЬНЫЕ ИКОНКИ (16x16) ДЛЯ КАЖДОГО ГЕРОЯ =====
+  // Каждая иконка — массив из 16x16 пикселей (код: 1=тело, 2=акцент, 3=оружие)
+  const iconData = {
+    warrior: [  // мечник (Анатоль, Петя)
+      [0,0,0,1,1,1,1,0,0,1,1,1,1,0,0,0],
+      [0,0,1,2,2,2,2,1,1,2,2,2,2,1,0,0],
+      [0,1,2,2,2,2,2,2,2,2,2,2,2,2,1,0],
+      [0,1,2,2,2,2,2,2,2,2,2,2,2,2,1,0],
+      [0,1,2,2,2,2,2,2,2,2,2,2,2,2,1,0],
+      [0,0,1,2,2,2,2,3,3,2,2,2,2,1,0,0],
+      [0,0,0,1,1,1,3,3,3,3,1,1,1,0,0,0],
+      [0,0,0,0,1,3,3,3,3,3,3,1,0,0,0,0],
+      [0,0,0,0,1,3,3,3,3,3,3,1,0,0,0,0],
+      [0,0,0,1,1,1,3,3,3,3,1,1,1,0,0,0],
+      [0,0,1,2,1,1,3,3,3,3,1,1,2,1,0,0],
+      [0,1,2,2,1,1,3,3,3,3,1,1,2,2,1,0],
+      [0,1,2,2,1,1,0,0,0,0,1,1,2,2,1,0],
+      [0,1,2,2,1,0,0,0,0,0,0,1,2,2,1,0],
+      [0,0,1,1,0,0,0,0,0,0,0,0,1,1,0,0],
+      [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+    ],
+    noble: [  // дворянин (Князь, Элен)
+      [0,0,0,0,1,1,1,1,1,1,0,0,0,0,0,0],
+      [0,0,0,1,2,2,2,2,2,2,1,0,0,0,0,0],
+      [0,0,1,2,2,2,2,2,2,2,2,1,0,0,0,0],
+      [0,0,1,2,2,2,2,2,2,2,2,1,0,0,0,0],
+      [0,0,1,2,2,2,2,2,2,2,2,1,0,0,0,0],
+      [0,0,0,1,2,2,2,2,2,2,1,0,0,0,0,0],
+      [0,0,0,0,1,1,1,1,1,1,0,0,0,0,0,0],
+      [0,0,0,0,1,3,3,3,3,1,0,0,0,0,0,0],
+      [0,0,0,0,1,3,3,3,3,1,0,0,0,0,0,0],
+      [0,0,0,0,1,1,1,1,1,1,0,0,0,0,0,0],
+      [0,0,0,1,2,1,1,1,1,2,1,0,0,0,0,0],
+      [0,0,1,2,2,1,1,1,1,2,2,1,0,0,0,0],
+      [0,0,1,2,2,1,0,0,1,2,2,1,0,0,0,0],
+      [0,0,1,2,2,0,0,0,0,2,2,1,0,0,0,0],
+      [0,0,0,1,1,0,0,0,0,1,1,0,0,0,0,0],
+      [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+    ],
+    commander: [  // полководец (Кутузов, Наполеон)
+      [0,0,0,0,1,1,1,1,1,1,0,0,0,0,0,0],
+      [0,0,0,1,2,2,2,2,2,2,1,0,0,0,0,0],
+      [0,0,1,2,2,2,2,2,2,2,2,1,0,0,0,0],
+      [0,0,1,2,2,2,2,2,2,2,2,1,0,0,0,0],
+      [0,0,1,2,2,2,2,2,2,2,2,1,0,0,0,0],
+      [0,0,0,1,2,2,3,3,2,2,1,0,0,0,0,0],
+      [0,0,0,0,1,3,3,3,3,1,0,0,0,0,0,0],
+      [0,0,0,1,1,3,3,3,3,1,1,0,0,0,0,0],
+      [0,0,1,2,1,3,3,3,3,1,2,1,0,0,0,0],
+      [0,0,1,2,1,1,1,1,1,1,2,1,0,0,0,0],
+      [0,0,1,2,2,1,1,1,1,2,2,1,0,0,0,0],
+      [0,0,0,1,2,2,1,1,2,2,1,0,0,0,0,0],
+      [0,0,0,1,2,2,0,0,2,2,1,0,0,0,0,0],
+      [0,0,0,0,1,1,0,0,1,1,0,0,0,0,0,0],
+      [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+      [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+    ]
+  };
+
   const heroes = [
-    {
-      name: 'Анатоль Курагин',
-      birthYear: 'ок. 1780',
-      deathYear: '1812',
-      deathPlace: 'После Бородинского сражения',
-      x: 1004, y: 414,
-      color: '#d13a2f',
-      bio: 'Красавец и повеса, брат Элен. Участвовал в Бородинском сражении, где был тяжело ранен. Ему ампутировали ногу, но спасти не смогли. Умер от гангрены.'
-    },
-    {
-      name: 'Петя Ростов',
-      birthYear: '1797',
-      deathYear: '1812',
-      deathPlace: 'Под Вязьмой',
-      x: 965, y: 482,
-      color: '#ff5555',
-      bio: 'Младший сын графа Ростова. В 15 лет ушёл на войну. Погиб в партизанском бою, бросившись вперёд лошади.'
-    },
-    {
-      name: 'Князь Николай Болконский',
-      birthYear: '1736',
-      deathYear: '1812',
-      deathPlace: 'Лысые Горы',
-      x: 1270, y: 235,
-      color: '#992222',
-      bio: 'Старый князь, отец Андрея. При приближении французов отказался бежать. Был разбит параличом и умер в своём имении.'
-    },
-    {
-      name: 'Элен Безухова',
-      birthYear: '1785',
-      deathYear: '1812',
-      deathPlace: 'Санкт-Петербург',
-      x: 848, y: 127,
-      color: '#e6b85c',
-      bio: 'Светская красавица, жена Пьера. Умерла при загадочных обстоятельствах.'
-    },
-    {
-      name: 'Михаил Кутузов',
-      birthYear: '1745',
-      deathYear: '1813',
-      deathPlace: 'Бунцлау, Силезия',
-      x: 481, y: 551,
-      color: '#c9a227',
-      bio: 'Главнокомандующий русской армией. Сдал Москву, чтобы сохранить армию. Умер через год после изгнания Наполеона.'
-    },
-    {
-      name: 'Наполеон Бонапарт',
-      birthYear: '1769',
-      deathYear: '1821',
-      deathPlace: 'Остров Святой Елены',
-      x: 68, y: 630,
-      color: '#555',
-      bio: 'Император Франции. Вторгся в Россию, занял пустую Москву, позорно бежал. Умер в ссылке.'
-    }
+    { name: 'Анатоль Курагин', iconType: 'warrior', birthYear: 'ок. 1780', deathYear: '1812', deathPlace: 'После Бородино', x: 1004, y: 414, color: '#d13a2f', bio: 'Красавец и повеса. Тяжело ранен под Бородином, умер от гангрены.' },
+    { name: 'Петя Ростов', iconType: 'warrior', birthYear: '1797', deathYear: '1812', deathPlace: 'Под Вязьмой', x: 965, y: 482, color: '#ff5555', bio: '15-летний юноша. Погиб в партизанском бою.' },
+    { name: 'Князь Болконский', iconType: 'noble', birthYear: '1736', deathYear: '1812', deathPlace: 'Лысые Горы', x: 1270, y: 235, color: '#992222', bio: 'Старый князь. Умер при приближении французов.' },
+    { name: 'Элен Безухова', iconType: 'noble', birthYear: '1785', deathYear: '1812', deathPlace: 'Санкт-Петербург', x: 848, y: 127, color: '#e6b85c', bio: 'Светская красавица. Умерла при загадочных обстоятельствах.' },
+    { name: 'Кутузов', iconType: 'commander', birthYear: '1745', deathYear: '1813', deathPlace: 'Бунцлау', x: 481, y: 551, color: '#c9a227', bio: 'Главнокомандующий. Умер после изгнания Наполеона.' },
+    { name: 'Наполеон', iconType: 'commander', birthYear: '1769', deathYear: '1821', deathPlace: 'Остров Св. Елены', x: 68, y: 630, color: '#555', bio: 'Император Франции. Умер в ссылке.' }
   ];
+
+  function drawPixelIcon(x, y, size, iconType, heroColor) {
+    const icon = iconData[iconType];
+    if (!icon) return;
+    
+    const pixelSize = size / 16;
+    const startX = x - size / 2;
+    const startY = y - size / 2;
+    
+    const colors = {
+      0: null,
+      1: heroColor,
+      2: '#ffd39a',
+      3: '#ffd700'
+    };
+    
+    for (let row = 0; row < 16; row++) {
+      for (let col = 0; col < 16; col++) {
+        const val = icon[row][col];
+        if (val && colors[val]) {
+          ctx.fillStyle = colors[val];
+          ctx.fillRect(startX + col * pixelSize, startY + row * pixelSize, pixelSize, pixelSize);
+        }
+      }
+    }
+  }
 
   function toCanvasX(x) { return offsetX + (x / ORIGINAL_WIDTH) * drawWidth; }
   function toCanvasY(y) { return offsetY + (y / ORIGINAL_HEIGHT) * drawHeight; }
 
   function drawMap() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
-    
     if (!mapImage.complete || mapImage.naturalWidth === 0) {
       ctx.fillStyle = '#ff6666';
       ctx.font = '16px monospace';
-      ctx.fillText('ОШИБКА: Файл map.jpg не найден!', canvas.width/2 - 200, canvas.height/2);
+      ctx.fillText('ОШИБКА: map.jpg не найден!', canvas.width/2 - 150, canvas.height/2);
       return;
     }
-    
     const imageRatio = ORIGINAL_WIDTH / ORIGINAL_HEIGHT;
     const canvasRatio = canvas.width / canvas.height;
-
     if (canvasRatio > imageRatio) {
       drawHeight = canvas.height;
       drawWidth = drawHeight * imageRatio;
@@ -288,10 +318,8 @@
       drawWidth = canvas.width;
       drawHeight = drawWidth / imageRatio;
     }
-
     offsetX = (canvas.width - drawWidth) / 2;
     offsetY = (canvas.height - drawHeight) / 2;
-
     ctx.drawImage(mapImage, offsetX, offsetY, drawWidth, drawHeight);
     drawHeroes();
   }
@@ -300,69 +328,51 @@
     heroes.forEach(hero => {
       const x = toCanvasX(hero.x);
       const y = toCanvasY(hero.y);
-      let scale = Math.max(2, drawWidth / ORIGINAL_WIDTH * 4);
-      
+      let iconSize = Math.max(24, drawWidth / ORIGINAL_WIDTH * 32);
       let isHovered = (hoveredHero === hero);
       
       if (isHovered) {
-        scale = scale * 1.15;
-        ctx.shadowColor = '#ffcc66';
+        iconSize = iconSize * 1.15;
         ctx.shadowBlur = 15;
+        ctx.shadowColor = '#ffaa44';
       } else {
-        ctx.shadowColor = '#ffcc66';
-        ctx.shadowBlur = 8;
+        ctx.shadowBlur = 5;
+        ctx.shadowColor = '#000000';
       }
-
-      ctx.fillStyle = '#ffd39a';
-      ctx.fillRect(x - scale, y - scale * 4, scale * 2, scale * 2);
       
-      ctx.fillStyle = hero.color;
-      ctx.fillRect(x - scale * 1.5, y - scale * 2, scale * 3, scale * 3);
-      
-      ctx.fillStyle = '#700';
-      ctx.fillRect(x - scale * 2, y - scale * 1.5, scale * 4, scale);
-      
-      ctx.fillStyle = '#ffd700';
-      ctx.fillRect(x + scale * 2, y - scale * 2, scale, scale * 4);
-      
+      drawPixelIcon(x, y, iconSize, hero.iconType, hero.color);
       ctx.shadowBlur = 0;
       
-      let fontSize = 13;
-      let nameOffsetX = 18;
-      let nameOffsetY = -10;
-      
+      let fontSize = Math.max(10, iconSize / 3);
       ctx.font = `${fontSize}px 'Courier New', monospace`;
       ctx.fillStyle = '#000';
-      ctx.fillText(hero.name, x + nameOffsetX, y + nameOffsetY);
-      ctx.fillStyle = '#ffe2a0';
-      ctx.fillText(hero.name, x + nameOffsetX - 1, y + nameOffsetY - 1);
+      ctx.fillText(hero.name, x + iconSize/2 + 5, y - 5);
+      ctx.fillStyle = '#ffddaa';
+      ctx.fillText(hero.name, x + iconSize/2 + 4, y - 6);
     });
   }
 
   function updateCursor() {
-    let isOverHero = false;
+    let over = false;
     heroes.forEach(hero => {
       const x = toCanvasX(hero.x);
       const y = toCanvasY(hero.y);
-      if (mouseX >= x - 30 && mouseX <= x + 30 && mouseY >= y - 35 && mouseY <= y + 35) {
-        isOverHero = true;
-      }
+      const size = Math.max(24, drawWidth / ORIGINAL_WIDTH * 32);
+      if (mouseX >= x - size/2 && mouseX <= x + size/2 && mouseY >= y - size/2 && mouseY <= y + size/2) over = true;
     });
-    canvas.style.cursor = isOverHero ? 'pointer' : 'default';
+    canvas.style.cursor = over ? 'pointer' : 'default';
   }
 
   canvas.addEventListener('mousemove', (e) => {
     const rect = canvas.getBoundingClientRect();
     mouseX = e.clientX - rect.left;
     mouseY = e.clientY - rect.top;
-    
     let newHovered = null;
     heroes.forEach(hero => {
       const x = toCanvasX(hero.x);
       const y = toCanvasY(hero.y);
-      if (mouseX >= x - 30 && mouseX <= x + 30 && mouseY >= y - 35 && mouseY <= y + 35) {
-        newHovered = hero;
-      }
+      const size = Math.max(24, drawWidth / ORIGINAL_WIDTH * 32);
+      if (mouseX >= x - size/2 && mouseX <= x + size/2 && mouseY >= y - size/2 && mouseY <= y + size/2) newHovered = hero;
     });
     hoveredHero = newHovered;
     updateCursor();
@@ -372,57 +382,31 @@
     const rect = canvas.getBoundingClientRect();
     const mx = e.clientX - rect.left;
     const my = e.clientY - rect.top;
-
     heroes.forEach(hero => {
       const x = toCanvasX(hero.x);
       const y = toCanvasY(hero.y);
-      if (mx >= x - 30 && mx <= x + 30 && my >= y - 35 && my <= y + 35) {
-        openModal(hero);
-      }
+      const size = Math.max(24, drawWidth / ORIGINAL_WIDTH * 32);
+      if (mx >= x - size/2 && mx <= x + size/2 && my >= y - size/2 && my <= y + size/2) openModal(hero);
     });
   });
 
   function openModal(hero) {
     document.getElementById('modalName').textContent = hero.name;
     document.getElementById('modalYear').textContent = hero.deathYear ? `† ${hero.deathYear}` : '';
-    
-    let status = hero.deathYear ? 'ПОГИБ / УМЕР' : 'ВЫЖИЛ';
-    document.getElementById('modalStatus').textContent = status;
+    document.getElementById('modalStatus').textContent = hero.deathYear ? 'ПОГИБ / УМЕР' : 'ВЫЖИЛ';
     document.getElementById('modalDates').textContent = `${hero.birthYear} — ${hero.deathYear || '...'}`;
     document.getElementById('modalDeathPlace').textContent = hero.deathPlace || '—';
     document.getElementById('modalBio').textContent = hero.bio;
     document.getElementById('modal').style.display = 'flex';
   }
 
-  function closeModal() {
-    document.getElementById('modal').style.display = 'none';
-  }
+  function closeModal() { document.getElementById('modal').style.display = 'none'; }
 
-  function animate() {
-    time += 0.05;
-    drawMap();
-    requestAnimationFrame(animate);
-  }
-
-  function resizeCanvas() {
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
-    drawMap();
-  }
-
+  function animate() { time += 0.05; drawMap(); requestAnimationFrame(animate); }
+  function resizeCanvas() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; drawMap(); }
   window.addEventListener('resize', resizeCanvas);
-
-  mapImage.onload = () => {
-    ORIGINAL_WIDTH = mapImage.width;
-    ORIGINAL_HEIGHT = mapImage.height;
-    resizeCanvas();
-    animate();
-  };
-
-  mapImage.onerror = () => {
-    resizeCanvas();
-  };
-
+  mapImage.onload = () => { ORIGINAL_WIDTH = mapImage.width; ORIGINAL_HEIGHT = mapImage.height; resizeCanvas(); animate(); };
+  mapImage.onerror = () => resizeCanvas();
   resizeCanvas();
 </script>
 
